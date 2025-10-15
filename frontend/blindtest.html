@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Blind Test - Solo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Blind Test - Mode Solo</h1>
+  <label for="genre">Choisir un genre :</label>
+  <select id="genre">
+    <option value="pop">Pop</option>
+    <option value="rap">Rap</option>
+    <option value="country">Country</option>
+    <!-- Ajoute d'autres genres si besoin -->
+  </select>
+  <button id="startBtn">Démarrer</button>
+
+  <div id="game" style="display:none;">
+    <p id="score">Score : 0</p>
+    <audio id="audio" controls></audio>
+    <div id="question"></div>
+    <div id="options"></div>
+    <button id="skipBtn">Passer</button>
+  </div>
+
+  <script src="blindtest.js"></script>
+</body>
+</html>

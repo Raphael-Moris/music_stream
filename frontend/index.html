@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Streaming - Upload</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎵 Uploader une chanson</h1>
+
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="audioFile">Fichier MP3 *</label>
+                <input type="file" id="audioFile" name="audioFile" accept="audio/*" required>
+            </div>
+
+            <div class="form-group">
+                <label for="title">Titre</label>
+                <input type="text" id="title" name="title" placeholder="Détecté automatiquement">
+            </div>
+
+            <div class="form-group">
+                <label for="artistName">Artiste</label>
+                <input type="text" id="artistName" name="artistName" placeholder="Détecté automatiquement">
+            </div>
+
+            <div class="form-group">
+                <label for="albumTitle">Album</label>
+                <input type="text" id="albumTitle" name="albumTitle" placeholder="Détecté automatiquement">
+            </div>
+
+            <div class="form-group">
+                <label for="year">Année</label>
+                <input type="number" id="year" name="year" placeholder="2024">
+            </div>
+
+
+            <!-- Ajoute ce bloc dans index.html, dans le <form id="uploadForm"> -->
+            <div class="form-group">
+                <label for="genre">Genre *</label>
+                <select id="genre" name="genre" required>
+                    <option value="">--Choisir un genre--</option>
+                    <option value="pop">Pop</option>
+                    <option value="rap">Rap</option>
+                    <option value="country">Country</option>
+                    <option value="rock">Rock</option>
+                    <option value="electro">Electro</option>
+                    <!-- Ajoute d'autres genres si besoin -->
+                </select>
+            </div>
+
+            <button type="submit" id="submitBtn">📤 Uploader</button>
+        </form>
+
+        <div id="progress" style="display: none;">
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <p id="progressText">Upload en cours...</p>
+        </div>
+
+        <div id="result"></div>
+
+        <hr>
+
+        <h2>📚 Liste des chansons</h2>
+        <div id="songsList"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MusicStream - Streaming Musical Révolutionnaire</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#FF6B35">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body data-theme="light">
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-container">
+            <div class="login-header">
+                <i class="fas fa-music"></i>
+                <h1>MusicStream</h1>
+                <p>Votre plateforme de streaming révolutionnaire</p>
+            </div>
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" value="demo@musicstream.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input type="password" id="password" value="demo123" required>
+                </div>
+                <button type="submit" class="btn btn--primary btn--full-width">Se connecter</button>
+                <div class="demo-info">
+                    <p><small>Compte démo pré-configuré</small></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="main-app" class="main-app hidden">
+        <!-- Sidebar (Desktop/Tablet) -->
+        <nav id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fas fa-music"></i>
+                    <span class="sidebar-text">MusicStream</span>
+                </div>
+                <button id="theme-toggle" class="theme-toggle">
+                    <i class="fas fa-sun"></i>
+                </button>
+                <button id="sidebar-toggle" class="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <div class="sidebar-menu">
+                <button class="menu-item active" data-page="home">
+                    <i class="fas fa-home"></i>
+                    <span class="sidebar-text">Accueil</span>
+                </button>
+                <button class="menu-item" data-page="search">
+                    <i class="fas fa-search"></i>
+                    <span class="sidebar-text">Recherche</span>
+                </button>
+                <button class="menu-item" data-page="library">
+                    <i class="fas fa-book"></i>
+                    <span class="sidebar-text">Bibliothèque</span>
+                </button>
+                <button class="menu-item" data-page="blindtest">
+                    <i class="fas fa-gamepad"></i>
+                    <span class="sidebar-text">Blind Test</span>
+                </button>
+                <button class="menu-item" data-page="profile">
+                    <i class="fas fa-user"></i>
+                    <span class="sidebar-text">Profil</span>
+                </button>
+            </div>
+            
+            <div class="sidebar-playlists">
+                <div class="playlists-header">
+                    <h3 class="sidebar-text">Mes Playlists</h3>
+                </div>
+                <div id="sidebar-playlists" class="playlists-list"></div>
+            </div>
+        </nav>
+
+        <!-- Bottom Navigation (Mobile) -->
+        <nav id="bottom-nav" class="bottom-nav">
+            <button class="bottom-nav-item active" data-page="home">
+                <i class="fas fa-home"></i>
+                <span>Accueil</span>
+            </button>
+            <button class="bottom-nav-item" data-page="search">
+                <i class="fas fa-search"></i>
+                <span>Recherche</span>
+            </button>
+            <button class="bottom-nav-item" data-page="library">
+                <i class="fas fa-book"></i>
+                <span>Bibliothèque</span>
+            </button>
+            <button class="bottom-nav-item" data-page="blindtest">
+                <i class="fas fa-gamepad"></i>
+                <span>Blind Test</span>
+            </button>
+            <button class="bottom-nav-item" data-page="profile">
+                <i class="fas fa-user"></i>
+                <span>Profil</span>
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main id="main-content" class="main-content">
+            <!-- Home Page -->
+            <div id="home-page" class="page active">
+                <div class="page-header">
+                    <h1>Bonjour, MusiqueLover</h1>
+                    <p>Découvrez votre musique personnalisée</p>
+                </div>
+                
+                <div class="recommendations-section">
+                    <h2>Pour vous</h2>
+                    <div id="recommendations-grid" class="music-grid"></div>
+                </div>
+
+                <div class="recently-played-section">
+                    <h2>Récemment écouté</h2>
+                    <div id="recently-played-grid" class="music-grid"></div>
+                </div>
+
+                <div class="playlists-section">
+                    <h2>Playlists suggérées</h2>
+                    <div id="suggested-playlists" class="playlists-grid"></div>
+                </div>
+
+                <div class="genres-section">
+                    <h2>Parcourir par genre</h2>
+                    <div id="genres-grid" class="genres-grid"></div>
+                </div>
+            </div>
+
+            <!-- Search Page -->
+            <div id="search-page" class="page">
+                <div class="search-header">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="search-input" placeholder="Rechercher des titres, artistes, albums...">
+                        <button id="voice-search" class="voice-search">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="search-filters">
+                    <button class="filter-btn active" data-filter="all">Tout</button>
+                    <button class="filter-btn" data-filter="tracks">Titres</button>
+                    <button class="filter-btn" data-filter="artists">Artistes</button>
+                    <button class="filter-btn" data-filter="albums">Albums</button>
+                    <button class="filter-btn" data-filter="playlists">Playlists</button>
+                </div>
+
+                <div id="search-results" class="search-results hidden">
+                    <div id="search-tracks" class="search-section">
+                        <h3>Titres</h3>
+                        <div class="tracks-list"></div>
+                    </div>
+                </div>
+
+                <div id="search-suggestions" class="search-suggestions">
+                    <h2>Suggestions de recherche</h2>
+                    <div id="suggestions-grid" class="suggestions-grid"></div>
+                </div>
+            </div>
+
+            <!-- Library Page -->
+            <div id="library-page" class="page">
+                <div class="page-header">
+                    <h1>Ma Bibliothèque</h1>
+                </div>
+
+                <div class="library-tabs">
+                    <button class="library-tab active" data-tab="music">Ma Musique</button>
+                    <button class="library-tab" data-tab="playlists">Mes Playlists</button>
+                    <button class="library-tab" data-tab="artists">Mes Artistes</button>
+                    <button class="library-tab" data-tab="history">Historique</button>
+                </div>
+
+                <div id="library-music" class="library-content active">
+                    <div class="library-header">
+                        <h2>Titres likés</h2>
+                        <div class="library-controls">
+                            <button id="play-all-liked" class="btn btn--primary">
+                                <i class="fas fa-play"></i> Tout lire
+                            </button>
+                        </div>
+                    </div>
+                    <div id="liked-tracks" class="tracks-list"></div>
+                </div>
+
+                <div id="library-playlists" class="library-content">
+                    <div class="library-header">
+                        <h2>Mes Playlists</h2>
+                        <button id="create-playlist" class="btn btn--primary">
+                            <i class="fas fa-plus"></i> Nouvelle playlist
+                        </button>
+                    </div>
+                    <div id="user-playlists" class="playlists-grid"></div>
+                </div>
+
+                <div id="library-artists" class="library-content">
+                    <h2>Artistes suivis</h2>
+                    <div id="followed-artists" class="artists-grid"></div>
+                </div>
+
+                <div id="library-history" class="library-content">
+                    <h2>Historique d'écoute</h2>
+                    <div id="listening-history" class="tracks-list"></div>
+                </div>
+            </div>
+
+            <!-- Blind Test Page -->
+            <div id="blindtest-page" class="page">
+                <div class="page-header">
+                    <h1>Blind Test</h1>
+                    <p>Testez vos connaissances musicales !</p>
+                </div>
+
+                <div id="blindtest-menu" class="blindtest-menu">
+                    <div class="game-modes">
+                        <div class="game-mode" data-mode="solo">
+                            <i class="fas fa-user"></i>
+                            <h3>Mode Solo</h3>
+                            <p>Défiez-vous personnellement</p>
+                        </div>
+                        <div class="game-mode" data-mode="multiplayer">
+                            <i class="fas fa-users"></i>
+                            <h3>Multijoueur</h3>
+                            <p>Jouez avec vos amis</p>
+                        </div>
+                    </div>
+
+                    <div class="game-stats">
+                        <h3>Vos statistiques</h3>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span class="stat-value">156</span>
+                                <span class="stat-label">Victoires</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">78%</span>
+                                <span class="stat-label">Précision</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">42</span>
+                                <span class="stat-label">Achievements</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="game-setup" class="game-setup hidden">
+                    <h2>Configuration du jeu</h2>
+                    <div class="setup-options">
+                        <div class="option-group">
+                            <label>Durée des extraits</label>
+                            <select id="clip-duration">
+                                <option value="5">5 secondes</option>
+                                <option value="10" selected>10 secondes</option>
+                                <option value="15">15 secondes</option>
+                                <option value="30">30 secondes</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <label>Catégorie</label>
+                            <select id="game-category">
+                                <option value="all">Toutes</option>
+                                <option value="Electronic">Electronic</option>
+                                <option value="Rock">Rock</option>
+                                <option value="Pop">Pop</option>
+                                <option value="Jazz">Jazz</option>
+                                <option value="Hip-Hop">Hip-Hop</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <label>Difficulté</label>
+                            <select id="game-difficulty">
+                                <option value="easy">Facile</option>
+                                <option value="medium" selected>Moyen</option>
+                                <option value="hard">Difficile</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="start-game" class="btn btn--primary">Commencer le jeu</button>
+                </div>
+
+                <div id="game-play" class="game-play hidden">
+                    <div class="game-header">
+                        <div class="game-info">
+                            <span>Question <span id="current-question">1</span>/5</span>
+                            <span id="game-score">Score: 0</span>
+                        </div>
+                        <div id="game-timer" class="game-timer">10</div>
+                    </div>
+
+                    <div class="game-audio">
+                        <div class="audio-visualizer">
+                            <div class="visualizer-bars"></div>
+                        </div>
+                        <div class="audio-controls">
+                            <button id="play-clip" class="btn btn--primary">
+                                <i class="fas fa-play"></i> Écouter l'extrait
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="game-input">
+                        <input type="text" id="answer-input" placeholder="Titre - Artiste">
+                        <button id="submit-answer" class="btn btn--primary">Valider</button>
+                        <button id="use-hint" class="btn btn--secondary">Indice (1 disponible)</button>
+                    </div>
+
+                    <div id="game-feedback" class="game-feedback hidden"></div>
+                </div>
+
+                <div id="game-results" class="game-results hidden">
+                    <h2>Résultats du jeu</h2>
+                    <div class="results-summary">
+                        <div class="final-score">
+                            <span id="final-score">0</span>
+                            <span>points</span>
+                        </div>
+                        <div class="results-details">
+                            <p>Bonnes réponses: <span id="correct-answers">0</span>/5</p>
+                            <p>Précision: <span id="accuracy">0</span>%</p>
+                            <p>Temps moyen: <span id="avg-time">0</span>s</p>
+                        </div>
+                    </div>
+                    <div class="results-actions">
+                        <button id="play-again" class="btn btn--primary">Rejouer</button>
+                        <button id="back-to-menu" class="btn btn--secondary">Menu</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Page -->
+            <div id="profile-page" class="page">
+                <div class="profile-header">
+                    <div class="profile-info">
+                        <img id="profile-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face" alt="Avatar">
+                        <div class="profile-details">
+                            <h1 id="profile-name">Demo User</h1>
+                            <p id="profile-username">@MusiqueLover</p>
+                            <p id="profile-bio">Passionné de musique depuis toujours, j'adore découvrir de nouveaux artistes et partager mes coups de cœur !</p>
+                            <div id="profile-genres" class="profile-genres"></div>
+                        </div>
+                    </div>
+                    <div class="profile-actions">
+                        <button class="btn btn--primary">Modifier le profil</button>
+                        <button id="logout-btn" class="btn btn--secondary">Déconnexion</button>
+                    </div>
+                </div>
+
+                <div class="profile-stats">
+                    <h2>Statistiques d'écoute</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <i class="fas fa-clock"></i>
+                            <div class="stat-info">
+                                <span class="stat-value">1,247h 32min</span>
+                                <span class="stat-label">Temps d'écoute total</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-music"></i>
+                            <div class="stat-info">
+                                <span class="stat-value">8,947</span>
+                                <span class="stat-label">Titres écoutés</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-user-friends"></i>
+                            <div class="stat-info">
+                                <span class="stat-value">342</span>
+                                <span class="stat-label">Artistes découverts</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-list"></i>
+                            <div class="stat-info">
+                                <span class="stat-value">23</span>
+                                <span class="stat-label">Playlists créées</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="achievements-section">
+                    <h2>Achievements</h2>
+                    <div class="achievements-grid">
+                        <div class="achievement unlocked">
+                            <i class="fas fa-trophy"></i>
+                            <span>Premier pas</span>
+                        </div>
+                        <div class="achievement unlocked">
+                            <i class="fas fa-headphones"></i>
+                            <span>Mélomane</span>
+                        </div>
+                        <div class="achievement unlocked">
+                            <i class="fas fa-gamepad"></i>
+                            <span>Master Blind Test</span>
+                        </div>
+                        <div class="achievement">
+                            <i class="fas fa-star"></i>
+                            <span>Découvreur</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Audio Player -->
+        <div id="audio-player" class="audio-player">
+            <div class="player-track-info">
+                <div class="track-cover">
+                    <img id="player-cover" src="" alt="Pochette">
+                    <div class="cover-overlay">
+                        <button id="player-toggle" class="player-btn">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="track-details">
+                    <div class="track-title" id="player-title">Sélectionnez une musique</div>
+                    <div class="track-artist" id="player-artist"></div>
+                </div>
+            </div>
+
+            <div class="player-controls">
+                <div class="control-buttons">
+                    <button id="shuffle-btn" class="control-btn">
+                        <i class="fas fa-random"></i>
+                    </button>
+                    <button id="prev-btn" class="control-btn">
+                        <i class="fas fa-step-backward"></i>
+                    </button>
+                    <button id="play-pause-btn" class="control-btn primary">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <button id="next-btn" class="control-btn">
+                        <i class="fas fa-step-forward"></i>
+                    </button>
+                    <button id="repeat-btn" class="control-btn">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                </div>
+                <div class="progress-bar">
+                    <span id="current-time">0:00</span>
+                    <div class="progress-container">
+                        <div class="progress" id="progress"></div>
+                        <div class="progress-handle" id="progress-handle"></div>
+                    </div>
+                    <span id="total-time">0:00</span>
+                </div>
+            </div>
+
+            <div class="player-extras">
+                <button id="like-btn" class="extra-btn">
+                    <i class="far fa-heart"></i>
+                </button>
+                <button id="lyrics-btn" class="extra-btn">
+                    <i class="fas fa-align-left"></i>
+                </button>
+                <button id="queue-btn" class="extra-btn">
+                    <i class="fas fa-list"></i>
+                </button>
+                <div class="volume-control">
+                    <button id="volume-btn" class="extra-btn">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                    <div class="volume-slider">
+                        <div class="volume-progress" id="volume-progress"></div>
+                        <div class="volume-handle" id="volume-handle"></div>
+                    </div>
+                </div>
+                <button id="fullscreen-btn" class="extra-btn">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Player Modal -->
+        <div id="mobile-player" class="mobile-player hidden">
+            <div class="mobile-player-header">
+                <button id="close-mobile-player" class="close-btn">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="mobile-player-title">En cours de lecture</div>
+            </div>
+            <div class="mobile-player-content">
+                <div class="mobile-cover">
+                    <img id="mobile-player-cover" src="" alt="Pochette">
+                </div>
+                <div class="mobile-track-info">
+                    <div class="mobile-track-title" id="mobile-player-title">Titre</div>
+                    <div class="mobile-track-artist" id="mobile-player-artist">Artiste</div>
+                </div>
+                <div class="mobile-controls">
+                    <div class="mobile-progress">
+                        <span id="mobile-current-time">0:00</span>
+                        <div class="mobile-progress-container">
+                            <div class="mobile-progress-bar" id="mobile-progress"></div>
+                        </div>
+                        <span id="mobile-total-time">0:00</span>
+                    </div>
+                    <div class="mobile-buttons">
+                        <button id="mobile-prev" class="mobile-control-btn">
+                            <i class="fas fa-step-backward"></i>
+                        </button>
+                        <button id="mobile-play-pause" class="mobile-control-btn primary">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button id="mobile-next" class="mobile-control-btn">
+                            <i class="fas fa-step-forward"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modals -->
+        <div id="lyrics-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Paroles</h2>
+                    <button class="modal-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="lyrics-content" class="lyrics-content"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="queue-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>File d'attente</h2>
+                    <button class="modal-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="queue-content" class="queue-content"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audio element -->
+        <audio id="audio-element" preload="metadata"></audio>
+
+        <!-- Toast notifications -->
+        <div id="toast-container" class="toast-container"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
