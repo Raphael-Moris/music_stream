@@ -1,93 +1,93 @@
-# Music Streaming Platform – SAE 3.02
+# Plateforme de Streaming Musical – SAE 3.02
 
-Full-stack streaming & blind-test platform built for the IUT R&T (semester 3).  
-Everything runs inside Docker so the experience is identical on Windows, macOS, and Linux.
-
----
-
-## ✨ Main features
-
-- JWT + Bcrypt authentication (signup/login).
-- Music player, playlists management, user profile with Cloudinary avatar.
-- BlindTest game (solo & multiplayer) powered by Socket.io.
-- Admin dashboard (users/songs/playlists/stats).
-- MongoDB dump (`Streaming_platform/`) auto-imported at startup.
+Plateforme complète de streaming et de blind-test réalisée pour l’IUT R&T (semestre 3).  
+Grâce à Docker, l’application se lance à l’identique sous Windows, macOS ou Linux.
 
 ---
 
-## 🧱 Tech stack
+## ✨ Fonctionnalités clés
 
-| Layer     | Technologies                             |
-|-----------|------------------------------------------|
-| Backend   | Node.js 18, Express, Socket.io, Mongoose |
-| Frontend  | HTML, CSS, vanilla JS                    |
-| Storage   | MongoDB 7 (Docker volume), Cloudinary    |
-| Auth      | JWT, Bcrypt                              |
-| Infra     | Docker, Docker Compose                   |
+- Authentification (inscription / connexion) sécurisée via JWT + Bcrypt.
+- Lecture musicale, gestion de playlists, profil utilisateur avec avatar Cloudinary.
+- BlindTest solo & multijoueur en temps réel (Socket.io).
+- Tableau de bord administrateur (utilisateurs, chansons, playlists, statistiques).
+- Import automatique du dump MongoDB (`Streaming_platform/`) au démarrage.
 
 ---
 
-## 📁 Repo layout
+## 🧱 Stack technique
+
+| Côté       | Technologies                                 |
+|------------|----------------------------------------------|
+| Backend    | Node.js 18, Express, Socket.io, Mongoose     |
+| Frontend   | HTML, CSS, JavaScript vanilla                |
+| Stockage   | MongoDB 7 (volume Docker), Cloudinary        |
+| Auth       | JWT, Bcrypt                                  |
+| Infrastructure | Docker, Docker Compose                   |
+
+---
+
+## 📁 Organisation du dépôt
 
 ```
 Projet/
-├─ backend/            # Express routes, models, scripts
-├─ frontend/           # Static pages + assets
+├─ backend/            # Routes Express, modèles Mongoose, scripts
+├─ frontend/           # Pages statiques et assets
 ├─ config/, data/, temp/
-├─ Streaming_platform/ # BSON dump imported into Mongo
+├─ Streaming_platform/ # Dump BSON importé dans Mongo
 ├─ docker-compose.yml
 ├─ Dockerfile
-├─ init-mongo.sh       # automatic restore
-├─ README-DOCKER.md    # deep dive / troubleshooting
-└─ README.md           # quick guide (this file)
+├─ init-mongo.sh       # Script de restauration automatique
+├─ README-DOCKER.md    # Guide détaillé / dépannage
+└─ README.md           # Guide rapide (ce fichier)
 ```
 
 ---
 
-## ✅ Prerequisites
+## ✅ Prérequis
 
-1. **Docker Desktop** (Windows/macOS) or **Docker Engine + Compose plugin** (Linux).  
-   - Check: `docker --version` and `docker compose version`.
-2. Internet connection (pull images + Cloudinary assets).
-3. Git access to clone the repository.
+1. **Docker Desktop** (Windows / macOS) ou **Docker Engine + plugin Compose** (Linux).  
+   - Vérification : `docker --version` et `docker compose version`.
+2. Connexion Internet (téléchargement des images + accès Cloudinary).
+3. Accès Git pour cloner le dépôt.
 
 ---
 
-## 🚀 Getting started (clone + Docker)
+## 🚀 Mise en route (cloner + Docker)
 
-1. **Clone the repository**
+1. **Cloner le dépôt**
    ```bash
    git clone git@github.com:Raphael-Moris/music_stream.git
    cd music_stream
-   # or HTTPS:
+   # ou en HTTPS :
    # git clone https://github.com/Raphael-Moris/music_stream.git
    ```
 
-2. **Copy the Docker env file**
+2. **Copier le fichier d’environnement Docker**
    ```bash
    # Windows PowerShell
    copy .env.docker .env
    # Linux / macOS
    cp .env.docker .env
    ```
-   `.env.docker` already embeds the shared Cloudinary keys and Docker-internal Mongo URI.  
-   No personal Cloudinary/MongoDB account is required to test.
+   `.env.docker` contient déjà les clés Cloudinary partagées et l’URI Mongo interne.  
+   Aucun compte externe n’est requis pour tester l’application.
 
-3. **Start the stack**
+3. **Lancer la stack**
    ```bash
    docker compose up --build
    ```
-   - Pulls Node & Mongo images, builds the app.
-   - Restores Mongo using `Streaming_platform/`.
-   - Exposes the UI/API on `http://localhost:3500`.
+   - Télécharge les images Node/Mongo et construit l’application.
+   - Restaure automatiquement la base grâce à `Streaming_platform/`.
+   - Expose l’UI / API sur `http://localhost:3500`.
 
-4. **Test the application**
-   - User UI: `http://localhost:3500`
-   - Admin page: `http://localhost:3500/admin.html`
-   - BlindTest: `http://localhost:3500/blindtest.html`
-   - Test credentials: see `README-DOCKER.md` or check the `users` collection.
+4. **Tester l’application**
+   - Interface utilisateur : `http://localhost:3500`
+   - Page admin : `http://localhost:3500/admin.html`
+   - BlindTest : `http://localhost:3500/blindtest.html`
+   - Identifiants de test : voir `README-DOCKER.md` ou la collection `users`.
 
-5. **Optional checks / diagnostics**
+5. **Contrôles / diagnostics (optionnel)**
    ```bash
    docker compose ps
    docker compose logs -f app
@@ -95,52 +95,52 @@ Projet/
      mongosh Streaming_platform --eval "db.users.countDocuments()"
    ```
 
-6. **Stop / restart**
+6. **Arrêter / relancer**
    ```bash
-   docker compose stop          # stop containers only
-   docker compose up -d         # restart in background
-   docker compose down -v       # full reset (containers + Mongo volume)
+   docker compose stop          # arrête les conteneurs
+   docker compose up -d         # relance en arrière-plan
+   docker compose down -v       # reset complet (conteneurs + volume Mongo)
    ```
 
 ---
 
-## 🧪 Quick verification list
+## 🧪 Liste de vérification rapide
 
-- Visit `http://localhost:3500` and log in / play music.
-- Upload a song (Cloudinary) and confirm it appears in Mongo.
-- Launch a BlindTest session from `/blindtest.html`.
-- Run `docker compose logs -f` to ensure no runtime errors.
-
----
-
-## 🤝 Collaboration across OS
-
-- Everyone uses the same Docker workflow above; no OS-specific tweaks.
-- Before sharing a build (team mate / professor):
-  1. Ensure `docker compose up --build` succeeds on your OS.
-  2. Confirm Cloudinary upload + BlindTest still work.
-  3. Update `README-DOCKER.md` if you changed the setup.
-- Deliverables: either push to GitHub or send a `.zip`/`.tar.gz` including `Streaming_platform/`.
+- Accéder à `http://localhost:3500`, se connecter et lire une chanson.
+- Uploader un titre (Cloudinary) et vérifier son enregistrement dans Mongo.
+- Lancer une session BlindTest (`/blindtest.html`).
+- Surveiller `docker compose logs -f` pour détecter d’éventuelles erreurs.
 
 ---
 
-## 🛠️ Running without Docker (optional)
+## 🤝 Collaboration multi-OS
 
-1. Install Node.js 18+ and MongoDB locally.
-2. `npm install` (root folder).
-3. Create `.env` (copy `.env.docker` then adjust `MONGODB_URI`).
-4. Import the dump manually: `mongorestore --db Streaming_platform Streaming_platform/`.
-5. Launch with `npm run dev` (nodemon).
-
-Docker remains the reference environment for grading/demo.
+- Tout le monde suit le même workflow Docker, sans adaptation spécifique.
+- Avant de livrer à un camarade ou au professeur :
+  1. Vérifier que `docker compose up --build` passe sur votre machine.
+  2. Tester l’upload Cloudinary et le BlindTest.
+  3. Mettre à jour `README-DOCKER.md` si un changement de procédure est nécessaire.
+- Livraison : dépôt GitHub ou archive `.zip` / `.tar.gz` incluant `Streaming_platform/`.
 
 ---
 
-## 📚 Support & docs
+## 🛠️ Exécution sans Docker (optionnel)
 
-- `README-DOCKER.md` → advanced usage, troubleshooting, backup/restore tips.
-- Utility scripts: `init-mongo.sh`, `fix-email-index.js`, `check-songs-duration.js`.
-- Diagnostic page: `http://localhost:3500/diagnostic.html`.
+1. Installer Node.js 18+ et MongoDB.
+2. `npm install` à la racine du projet.
+3. Créer `.env` (copier `.env.docker` puis adapter `MONGODB_URI`).
+4. Importer le dump : `mongorestore --db Streaming_platform Streaming_platform/`.
+5. Lancer en dev : `npm run dev` (nodemon).
+
+Docker reste toutefois l’environnement de référence pour les démonstrations / corrections.
+
+---
+
+## 📚 Documentation & support
+
+- `README-DOCKER.md` : procédures avancées, sauvegarde/restauration, FAQ.
+- Scripts utiles : `init-mongo.sh`, `fix-email-index.js`, `check-songs-duration.js`.
+- Page diagnostic : `http://localhost:3500/diagnostic.html`.
 
 ---
 
