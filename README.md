@@ -52,7 +52,7 @@ Projet/
 
 ---
 
-## 🚀 Mise en route (team mates & professeur)
+## 🚀 Mise en route 
 
 1. **Copier la configuration**  
    ```bash
