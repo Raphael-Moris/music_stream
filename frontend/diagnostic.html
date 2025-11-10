@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnostic - Blind Test</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #fff;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #ff6b35;
+            margin-bottom: 30px;
+        }
+        .section {
+            background: #1a1a1a;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid #2a2a2a;
+        }
+        .section h2 {
+            color: #ff8c42;
+            margin-top: 0;
+            font-size: 18px;
+        }
+        .info-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #2a2a2a;
+        }
+        .info-line:last-child {
+            border-bottom: none;
+        }
+        .label {
+            color: #999;
+        }
+        .value {
+            color: #4ade80;
+            font-weight: 600;
+        }
+        .value.null {
+            color: #ef4444;
+        }
+        .btn {
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        pre {
+            background: #0a0a0a;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            color: #4ade80;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnostic Blind Test</h1>
+
+    <div class="section">
+        <h2>📦 LocalStorage</h2>
+        <div id="localStorage-content"></div>
+        <button class="btn" onclick="refreshLocalStorage()">🔄 Rafraîchir</button>
+        <button class="btn" onclick="clearAndReconnect()" style="background: #ef4444;">🗑️ Tout effacer et se reconnecter</button>
+    </div>
+
+    <div class="section">
+        <h2>🔐 Contenu du Token JWT</h2>
+        <div id="token-content"></div>
+    </div>
+
+    <div class="section">
+        <h2>🎮 Blind Test Variables</h2>
+        <div id="blindtest-vars"></div>
+    </div>
+
+    <div class="section">
+        <h2>🌐 Test API</h2>
+        <button class="btn" onclick="testStatsAPI()">Tester GET /api/blindtest/stats</button>
+        <button class="btn" onclick="testPlaylistsAPI()">Tester GET /api/blindtest/playlists/compatible</button>
+        <div id="api-results" style="margin-top: 15px;"></div>
+    </div>
+
+    <script>
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function refreshLocalStorage() {
+            const container = document.getElementById('localStorage-content');
+            container.innerHTML = '';
+
+            const keys = ['token', 'userId', 'username', 'role'];
+
+            keys.forEach(key => {
+                const value = localStorage.getItem(key);
+                const div = document.createElement('div');
+                div.className = 'info-line';
+
+                const valueClass = value ? 'value' : 'value null';
+                const displayValue = value || 'NULL ❌';
+
+                div.innerHTML = `
+                    <span class="label">${key}:</span>
+                    <span class="${valueClass}">${displayValue}</span>
+                `;
+                container.appendChild(div);
+            });
+
+            // Decode token
+            const token = localStorage.getItem('token');
+            const tokenContainer = document.getElementById('token-content');
+
+            if (token) {
+                const decoded = parseJwt(token);
+                if (decoded) {
+                    tokenContainer.innerHTML = `<pre>${JSON.stringify(decoded, null, 2)}</pre>`;
+                } else {
+                    tokenContainer.innerHTML = '<p style="color:#ef4444;">❌ Impossible de décoder le token</p>';
+                }
+            } else {
+                tokenContainer.innerHTML = '<p style="color:#ef4444;">❌ Aucun token trouvé</p>';
+            }
+
+            // Blind test vars
+            const blindtestContainer = document.getElementById('blindtest-vars');
+            const userId = localStorage.getItem('userId');
+            const username = localStorage.getItem('username');
+
+            blindtestContainer.innerHTML = `
+                <div class="info-line">
+                    <span class="label">userId utilisé par blindtest.js:</span>
+                    <span class="${userId ? 'value' : 'value null'}">${userId || 'NULL ❌'}</span>
+                </div>
+                <div class="info-line">
+                    <span class="label">username utilisé par blindtest.js:</span>
+                    <span class="${username ? 'value' : 'value null'}">${username || 'NULL ❌'}</span>
+                </div>
+            `;
+        }
+
+        function clearAndReconnect() {
+            if (confirm('Êtes-vous sûr de vouloir effacer toutes les données et vous reconnecter ?')) {
+                localStorage.clear();
+                alert('✅ LocalStorage effacé ! Redirection vers la page de connexion...');
+                window.location.href = 'login.html';
+            }
+        }
+
+        async function testStatsAPI() {
+            const resultsDiv = document.getElementById('api-results');
+            const token = localStorage.getItem('token');
+            const userId = localStorage.getItem('userId');
+
+            if (!token || !userId) {
+                resultsDiv.innerHTML = '<p style="color:#ef4444;">❌ token ou userId manquant dans localStorage</p>';
+                return;
+            }
+
+            resultsDiv.innerHTML = '<p style="color:#999;">⏳ Chargement...</p>';
+
+            try {
+                const response = await fetch(`/api/blindtest/stats/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultsDiv.innerHTML = `
+                        <p style="color:#4ade80;">✅ API Stats OK !</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <p style="color:#ef4444;">❌ Erreur ${response.status}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<p style="color:#ef4444;">❌ Erreur réseau: ${error.message}</p>`;
+            }
+        }
+
+        async function testPlaylistsAPI() {
+            const resultsDiv = document.getElementById('api-results');
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                resultsDiv.innerHTML = '<p style="color:#ef4444;">❌ token manquant dans localStorage</p>';
+                return;
+            }
+
+            resultsDiv.innerHTML = '<p style="color:#999;">⏳ Chargement...</p>';
+
+            try {
+                const response = await fetch('/api/blindtest/playlists/compatible', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultsDiv.innerHTML = `
+                        <p style="color:#4ade80;">✅ API Playlists OK ! (${data.data.length} playlists compatibles)</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <p style="color:#ef4444;">❌ Erreur ${response.status}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<p style="color:#ef4444;">❌ Erreur réseau: ${error.message}</p>`;
+            }
+        }
+
+        // Auto-refresh on load
+        refreshLocalStorage();
+    </script>
+</body>
+</html>

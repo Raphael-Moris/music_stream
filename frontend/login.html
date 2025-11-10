@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MusicStream - Connexion</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: linear-gradient(135deg, #1a1a1a, #252525);
+            border: 1px solid #2a2a2a;
+            border-radius: 24px;
+            padding: 48px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo-content {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 32px;
+            font-weight: 800;
+            color: #ff7a3a;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            color: #ff6b35;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 32px;
+            background: #0d0d0d;
+            padding: 6px;
+            border-radius: 12px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: #999;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #cfcfcf;
+            letter-spacing: 0.3px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+            font-size: 15px;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #ff6b35;
+            background: rgba(255, 107, 53, 0.08);
+        }
+
+        input::placeholder {
+            color: #666;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        #authMsg {
+            margin-top: 20px;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+        }
+
+        #authMsg.success {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            display: block;
+        }
+
+        #authMsg.error {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            display: block;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 24px;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .form-footer a {
+            color: #ff6b35;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <div class="logo-content">
+                <span class="logo-icon"><i data-lucide="music"></i></span>
+                <span>MusicStream</span>
+            </div>
+        </div>
+
+        <div class="auth-tabs">
+            <button class="tab-btn active" data-tab="login">Connexion</button>
+            <button class="tab-btn" data-tab="register">Inscription</button>
+        </div>
+
+        <!-- Formulaire de connexion -->
+        <div id="loginSection" class="form-section active">
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginUsername">Nom d'utilisateur</label>
+                    <input type="text" id="loginUsername" placeholder="Entrez votre nom d'utilisateur" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Mot de passe</label>
+                    <input type="password" id="loginPassword" placeholder="Entrez votre mot de passe" required>
+                </div>
+                <button type="submit" class="btn">
+                    <i data-lucide="log-in"></i>
+                    Se connecter
+                </button>
+            </form>
+        </div>
+
+        <!-- Formulaire d'inscription -->
+        <div id="registerSection" class="form-section">
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerUsername">Nom d'utilisateur</label>
+                    <input type="text" id="registerUsername" placeholder="Choisissez un nom d'utilisateur" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Mot de passe</label>
+                    <input type="password" id="registerPassword" placeholder="Créez un mot de passe (min. 6 caractères)" required>
+                </div>
+                <button type="submit" class="btn">
+                    <i data-lucide="user-plus"></i>
+                    S'inscrire
+                </button>
+            </form>
+        </div>
+
+        <div id="authMsg"></div>
+    </div>
+
+    <script>
+        // Initialiser les icônes Lucide
+        lucide.createIcons();
+
+        // Gestion des onglets
+        const tabs = document.querySelectorAll('.tab-btn');
+        const loginSection = document.getElementById('loginSection');
+        const registerSection = document.getElementById('registerSection');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                const targetTab = tab.dataset.tab;
+                if (targetTab === 'login') {
+                    loginSection.classList.add('active');
+                    registerSection.classList.remove('active');
+                } else {
+                    registerSection.classList.add('active');
+                    loginSection.classList.remove('active');
+                }
+
+                // Réinitialiser les messages
+                document.getElementById('authMsg').style.display = 'none';
+            });
+        });
+    </script>
+    <script src="login.js"></script>
+</body>
+</html>

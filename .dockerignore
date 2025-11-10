@@ -1,0 +1,48 @@
+# Dépendances Node.js (seront réinstallées dans le conteneur)
+node_modules
+npm-debug.log
+
+# Fichiers de configuration locaux
+.env
+.env.local
+.env.*.local
+
+# Fichiers Git
+.git
+.gitignore
+.github
+
+# IDE et éditeurs
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Fichiers temporaires
+*.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Documentation et fichiers de développement
+README.md
+*.md
+!README-DOCKER.md
+
+# Scripts de test
+test-*.js
+check-*.js
+
+# Fichiers Docker (pour éviter la récursion)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Backups et données temporaires
+backup
+*.bak
+
+# Fichiers Windows
+desktop.ini

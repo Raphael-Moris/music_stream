@@ -1,0 +1,47 @@
+# Node dependencies
+node_modules/
+**/node_modules/
+
+# Logs & diagnostics
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+logs/
+
+# Runtime artifacts
+temp/
+backend/data/uploads/
+.cache/
+coverage/
+dist/
+build/
+
+# Environment & secrets
+.env
+.env.*
+!.env.docker
+!.env.example
+!.env.*.example
+!.env.copy
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Docker
+*.pid
+*.seed
+
+# Archives / exports
+*.zip
+*.tar
+*.tar.gz
+

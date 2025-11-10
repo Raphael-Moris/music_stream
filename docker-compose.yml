@@ -1,0 +1,59 @@
+
+
+services:
+  # Service MongoDB
+  mongodb:
+    image: mongo:7.0
+    container_name: musicstream-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: Streaming_platform
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./Streaming_platform:/docker-entrypoint-initdb.d/backup:ro
+      - ./init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh:ro
+    networks:
+      - musicstream-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  # Service Application Node.js
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: musicstream-app
+    restart: unless-stopped
+    ports:
+      - "3500:3500"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/Streaming_platform
+      - PORT=3500
+      - JWT_SECRET=${JWT_SECRET:-music_stream}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - musicstream-network
+    volumes:
+      # Mode développement : synchroniser le code en temps réel (décommenter si besoin)
+      # - ./:/app
+      # - /app/node_modules
+      - ./backend/data:/app/backend/data
+
+networks:
+  musicstream-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local

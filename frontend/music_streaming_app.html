@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MusicStream - Votre musique, partout</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: #0d0d0d;
+            padding: 24px;
+            border-right: 1px solid #2a2a2a;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo::before {
+            content: "♪";
+            font-size: 32px;
+            -webkit-text-fill-color: #ff6b35;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex: 1;
+        }
+
+        .nav-item {
+            padding: 14px 18px;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 15px;
+        }
+
+        .nav-item:hover {
+            background: #1a1a1a;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 32px;
+            overflow-y: auto;
+        }
+
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff, #ff6b35);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: #999;
+            font-size: 16px;
+        }
+
+        .section {
+            margin-bottom: 48px;
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-size: 24px;
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #1a1a1a, #252525);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #2a2a2a;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff6b35, #ff8c42);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(255, 107, 53, 0.2);
+            border-color: #ff6b35;
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .card-subtitle {
+            color: #999;
+            font-size: 14px;
+        }
+
+        /* Boutons */
+        .btn {
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-secondary {
+            background: #1a1a1a;
+            border: 2px solid #ff6b35;
+        }
+
+        .btn-secondary:hover {
+            background: #252525;
+        }
+
+        /* Liste */
+        .list-item {
+            background: #1a1a1a;
+            padding: 18px 24px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #2a2a2a;
+        }
+
+        .list-item:hover {
+            background: #252525;
+            border-color: #ff6b35;
+            transform: translateX(8px);
+        }
+
+        .list-item-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .list-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #1a1a1a, #252525);
+            padding: 28px;
+            border-radius: 16px;
+            border: 1px solid #2a2a2a;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: scale(1.05);
+            border-color: #ff6b35;
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: #999;
+            font-size: 16px;
+        }
+
+        /* Genres */
+        .genres-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .genre-card {
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            padding: 32px 20px;
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .genre-card:hover {
+            transform: scale(1.08) rotate(2deg);
+            box-shadow: 0 12px 30px rgba(255, 107, 53, 0.4);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0d0d0d;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ff6b35;
+            border-radius: 4px;
+        }
+
+        .import-zone {
+            border: 2px dashed #ff6b35;
+            border-radius: 16px;
+            padding: 48px;
+            text-align: center;
+            margin-bottom: 32px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .import-zone:hover {
+            background: #1a1a1a;
+            border-style: solid;
+        }
+
+        .import-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">MusicStream</div>
+            <ul class="nav-menu">
+                <li class="nav-item active" onclick="showSection('accueil')">
+                    <span class="nav-icon">🏠</span>
+                    Accueil
+                </li>
+                <li class="nav-item" onclick="showSection('bibliotheque')">
+                    <span class="nav-icon">📚</span>
+                    Ma Bibliothèque
+                </li>
+                <li class="nav-item" onclick="showSection('blindtest')">
+                    <span class="nav-icon">🎮</span>
+                    Blind Test
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Section Accueil -->
+            <div id="accueil" class="section active">
+                <div class="header">
+                    <h1>Bienvenue !</h1>
+                    <p>Découvrez votre musique préférée</p>
+                </div>
+
+                <div class="section-title">Pour vous</div>
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-image">🎵</div>
+                        <div class="card-title">Mix du jour</div>
+                        <div class="card-subtitle">Personnalisé pour vous</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-image">🔥</div>
+                        <div class="card-title">Tendances</div>
+                        <div class="card-subtitle">Les hits du moment</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-image">✨</div>
+                        <div class="card-title">Découvertes</div>
+                        <div class="card-subtitle">Nouveaux artistes</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-image">💫</div>
+                        <div class="card-title">Favoris</div>
+                        <div class="card-subtitle">Vos meilleures musiques</div>
+                    </div>
+                </div>
+
+                <div class="section-title" style="margin-top: 48px;">Récemment écouté</div>
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-image">🎸</div>
+                        <div class="card-title">Rock Legends</div>
+                        <div class="card-subtitle">Classiques rock</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-image">🎹</div>
+                        <div class="card-title">Piano Vibes</div>
+                        <div class="card-subtitle">Musique relaxante</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-image">🎤</div>
+                        <div class="card-title">Top Hits</div>
+                        <div class="card-subtitle">Les plus écoutés</div>
+                    </div>
+                </div>
+
+                <div class="section-title" style="margin-top: 48px;">Playlists suggérées</div>
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-image">🌙</div>
+                        <div class="card-title">Nuit étoilée</div>
+                        <div class="card-subtitle">Ambiance nocturne</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-image">☀️</div>
+                        <div class="card-title">Morning Boost</div>
+                        <div class="card-subtitle">Démarrez la journée</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-image">🏃</div>
+                        <div class="card-title">Workout Energy</div>
+                        <div class="card-subtitle">Sport intensif</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-image">☕</div>
+                        <div class="card-title">Café & Chill</div>
+                        <div class="card-subtitle">Moments détente</div>
+                    </div>
+                </div>
+
+                <div class="section-title" style="margin-top: 48px;">Parcourir par genre</div>
+                <div class="genres-grid">
+                    <div class="genre-card">Pop</div>
+                    <div class="genre-card">Rock</div>
+                    <div class="genre-card">Hip-Hop</div>
+                    <div class="genre-card">Jazz</div>
+                    <div class="genre-card">Électro</div>
+                    <div class="genre-card">Classique</div>
+                    <div class="genre-card">R&B</div>
+                    <div class="genre-card">Reggae</div>
+                </div>
+            </div>
+
+            <!-- Section Bibliothèque -->
+            <div id="bibliotheque" class="section">
+                <div class="header">
+                    <h1>Ma Bibliothèque</h1>
+                    <p>Gérez votre collection musicale</p>
+                </div>
+
+                <div class="import-zone">
+                    <div class="import-icon">📁</div>
+                    <div style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">Importer mes MP3's</div>
+                    <div style="color: #999;">Glissez-déposez vos fichiers ou cliquez pour parcourir</div>
+                </div>
+
+                <div class="list-item">
+                    <div class="list-item-content">
+                        <div class="list-icon">📋</div>
+                        <div>
+                            <div class="card-title">Mes Playlists</div>
+                            <div class="card-subtitle">12 playlists</div>
+                        </div>
+                    </div>
+                    <span style="color: #ff6b35;">›</span>
+                </div>
+
+                <button class="btn" style="margin: 24px 0; width: 100%;">
+                    <span>➕</span> Nouvelle playlist
+                </button>
+
+                <div class="list-item">
+                    <div class="list-item-content">
+                        <div class="list-icon">🎤</div>
+                        <div>
+                            <div class="card-title">Mes Artistes</div>
+                            <div class="card-subtitle">48 artistes suivis</div>
+                        </div>
+                    </div>
+                    <span style="color: #ff6b35;">›</span>
+                </div>
+
+                <div class="list-item">
+                    <div class="list-item-content">
+                        <div class="list-icon">⏱️</div>
+                        <div>
+                            <div class="card-title">Historique</div>
+                            <div class="card-subtitle">Vos écoutes récentes</div>
+                        </div>
+                    </div>
+                    <span style="color: #ff6b35;">›</span>
+                </div>
+
+                <div class="list-item">
+                    <div class="list-item-content">
+                        <div class="list-icon">❤️</div>
+                        <div>
+                            <div class="card-title">Titres likés</div>
+                            <div class="card-subtitle">234 titres</div>
+                        </div>
+                    </div>
+                    <span style="color: #ff6b35;">›</span>
+                </div>
+
+                <div class="list-item">
+                    <div class="list-item-content">
+                        <div class="list-icon">📊</div>
+                        <div>
+                            <div class="card-title">Historique d'écoute</div>
+                            <div class="card-subtitle">Statistiques détaillées</div>
+                        </div>
+                    </div>
+                    <span style="color: #ff6b35;">›</span>
+                </div>
+            </div>
+
+            <!-- Section Blind Test -->
+            <div id="blindtest" class="section">
+                <div class="header">
+                    <h1>Blind Test</h1>
+                    <p>Testez vos connaissances musicales</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">156</div>
+                        <div class="stat-label">Victoires</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">89%</div>
+                        <div class="stat-label">Taux de réussite</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">42</div>
+                        <div class="stat-label">Série actuelle</div>
+                    </div>
+                </div>
+
+                <div class="section-title">Mode Solo</div>
+                <div class="card" style="margin-bottom: 32px; padding: 32px;">
+                    <div style="display: flex; align-items: center; gap: 24px; margin-bottom: 20px;">
+                        <div style="font-size: 48px;">🎯</div>
+                        <div>
+                            <div class="card-title" style="font-size: 20px;">Défiez-vous personnellement</div>
+                            <div class="card-subtitle">Testez vos connaissances et améliorez votre score</div>
+                        </div>
+                    </div>
+                    <button class="btn">Lancer une partie solo</button>
+                </div>
+
+                <div class="section-title">Multijoueur</div>
+                <div class="card" style="margin-bottom: 32px; padding: 32px;">
+                    <div style="display: flex; align-items: center; gap: 24px; margin-bottom: 20px;">
+                        <div style="font-size: 48px;">👥</div>
+                        <div>
+                            <div class="card-title" style="font-size: 20px;">Jouez avec vos amis</div>
+                            <div class="card-subtitle">Créez ou rejoignez une partie multijoueur</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 16px;">
+                        <button class="btn">Créer une partie</button>
+                        <button class="btn btn-secondary">Rejoindre une partie</button>
+                    </div>
+                </div>
+
+                <div class="section-title">Vos statistiques</div>
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-image">🏆</div>
+                        <div class="card-title">Meilleur score</div>
+                        <div class="card-subtitle">9800 points</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-image">⚡</div>
+                        <div class="card-title">Plus rapide</div>
+                        <div class="card-subtitle">1.2 secondes</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-image">🎵</div>
+                        <div class="card-title">Titres trouvés</div>
+                        <div class="card-subtitle">567 titres</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-image">📈</div>
+                        <div class="card-title">Progression</div>
+                        <div class="card-subtitle">+12% ce mois</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function showSection(sectionId) {
+            // Masquer toutes les sections
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.remove('active'));
+            
+            // Afficher la section sélectionnée
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Mettre à jour le menu
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+    </script>
+</body>
+</html>

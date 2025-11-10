@@ -1,0 +1,1965 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MusicStream - Votre musique, partout</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsmediatags@3.9.7/dist/jsmediatags.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+            padding-bottom: 110px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: #0d0d0d;
+            padding: 24px;
+            border-right: 1px solid #2a2a2a;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            color: #ff7a3a;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: .5px;
+            text-shadow: 0 2px 8px rgba(255, 107, 53, .3);
+        }
+
+        .logo-icon {
+            width: 34px;
+            height: 34px;
+            display: grid;
+            place-items: center;
+            border-radius: 10px;
+            color: #fff;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex: 1;
+        }
+
+        .nav-item {
+            padding: 14px 18px;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all .3s ease;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 15px;
+        }
+
+        .nav-item:hover {
+            background: #1a1a1a;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            box-shadow: 0 4px 15px rgba(255, 107, 53, .3);
+        }
+
+        .nav-icon {
+            display: inline-flex;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 32px;
+            overflow-y: auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logout-btn {
+            align-self: flex-end;
+            position: static;
+            margin-bottom: 24px;
+            display: none;
+        }
+
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff, #ff6b35);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: #999;
+            font-size: 16px;
+        }
+
+        .section {
+            margin-bottom: 48px;
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn .4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-size: 24px;
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #1a1a1a, #252525);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all .3s ease;
+            border: 1px solid #2a2a2a;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff6b35, #ff8c42);
+            transform: scaleX(0);
+            transition: transform .3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(255, 107, 53, .2);
+            border-color: #ff6b35;
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: #fff;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .card-subtitle {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .card.song-card {
+            background: #161616;
+            border: 1px solid #242424;
+            padding: 18px;
+            cursor: default;
+            transition: border .2s ease;
+        }
+
+        .card.song-card::before {
+            content: none;
+        }
+
+        .card.song-card:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: #ff6b35;
+        }
+
+        .song-card-image {
+            position: relative;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #1a1a1a;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            display: block;
+        }
+
+        .song-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+            transition: transform .25s ease;
+        }
+
+        .song-card-image::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            opacity: 0;
+            transition: opacity .2s ease;
+            z-index: 1;
+        }
+
+        .card.song-card:hover .song-card-image img {
+            transform: scale(1.03);
+        }
+
+        .song-card-play {
+            position: absolute;
+            inset: 50% auto auto 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            border: none;
+            color: #fff;
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity .2s ease, transform .2s ease;
+            z-index: 2;
+        }
+
+        .song-card-play i {
+            width: 24px;
+            height: 24px;
+        }
+
+        .card.song-card:hover .song-card-image::after {
+            opacity: 1;
+        }
+
+        .card.song-card:hover .song-card-play {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
+        .pause-symbol {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 20px;
+            letter-spacing: 2px;
+            padding-left: 2px;
+        }
+
+
+        .btn {
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            color: #fff;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+
+        .btn:hover {
+            transform: translateY(0);
+            box-shadow: 0 8px 20px rgba(255, 107, 53, .4);
+        }
+
+        .btn-secondary {
+            background: #1a1a1a;
+            border: 2px solid #ff6b35;
+        }
+
+        .btn-secondary:hover {
+            background: #252525;
+        }
+
+
+        /* NOUVEAUX STYLES: Styles pour la vue détaillée de la playlist */
+        .songs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+            padding-bottom: 80px;
+        }
+
+        .song-card {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .song-card:hover {
+            background: #252525;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            border-color: #ff6b35;
+        }
+
+        .song-card img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            object-position: center;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            display: block;
+        }
+
+        .song-card .song-title {
+            font-weight: 600;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 15px;
+        }
+
+        .song-card .song-artist {
+            font-size: 13px;
+            color: #aaa;
+            margin-top: 4px;
+        }
+
+
+
+        .list-item {
+            background: #1a1a1a;
+            padding: 18px 24px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all .3s ease;
+            border: 1px solid #2a2a2a;
+        }
+
+        .list-item:hover {
+            background: #252525;
+            border-color: #ff6b35;
+            transform: translateX(8px);
+        }
+
+        .list-item-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .list-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #1a1a1a, #252525);
+            padding: 28px;
+            border-radius: 16px;
+            border: 1px solid #2a2a2a;
+            text-align: center;
+            transition: all .3s ease;
+        }
+
+        .stat-card:hover {
+            transform: scale(1.05);
+            border-color: #ff6b35;
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: #999;
+            font-size: 16px;
+        }
+
+        .genres-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .genre-card {
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            padding: 32px 20px;
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .3s ease;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .genre-card:hover {
+            transform: scale(1.08) rotate(2deg);
+            box-shadow: 0 12px 30px rgba(255, 107, 53, .4);
+        }
+
+        /* Import + Progress */
+        .import-zone {
+            border: 2px dashed #ff6b35;
+            border-radius: 16px;
+            padding: 48px;
+            text-align: center;
+            margin-bottom: 18px;
+            transition: all .3s ease;
+            cursor: pointer;
+        }
+
+        .import-zone:hover {
+            background: #1a1a1a;
+            border-style: solid;
+        }
+
+        .import-zone.dragover {
+            background: #1a1a1a;
+            border-style: solid;
+        }
+
+        .import-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ff6b35;
+        }
+
+        .upload-progress {
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .upload-bar {
+            position: relative;
+            height: 10px;
+            flex: 1;
+            background: #0f0f0f;
+            border: 1px solid #2a2a2a;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .upload-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            border-radius: 999px;
+            transition: width .2s ease;
+        }
+
+        .upload-text {
+            color: #ff8c42;
+            font-weight: 600;
+        }
+
+        /* Import Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            padding: 24px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-panel {
+            width: min(680px, 100%);
+            background: #101010;
+            border-radius: 20px;
+            padding: 36px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            background: transparent;
+            border: none;
+            color: #bbb;
+            cursor: pointer;
+            font-size: 22px;
+            transition: color .2s ease;
+        }
+
+        .modal-close:hover {
+            color: #fff;
+        }
+
+        .modal-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-subtitle {
+            color: #9c9c9c;
+            font-size: 15px;
+            margin-bottom: 24px;
+        }
+
+        .modal-import-area {
+            border: 2px dashed #ff6b35;
+            border-radius: 18px;
+            padding: 32px;
+            display: grid;
+            place-items: center;
+            text-align: center;
+            gap: 10px;
+            cursor: pointer;
+            background: rgba(255, 107, 53, 0.06);
+            transition: all .3s ease;
+        }
+
+        .modal-import-area:hover,
+        .modal-import-area.dragover {
+            background: rgba(255, 107, 53, 0.15);
+            border-style: solid;
+        }
+
+        .modal-import-area small {
+            color: #9c9c9c;
+            font-size: 13px;
+        }
+
+        .metadata-grid {
+            margin-top: 28px;
+            display: grid;
+            gap: 18px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+
+        .metadata-field label {
+            font-size: 14px;
+            color: #cfcfcf;
+            display: block;
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+        }
+
+        .metadata-field input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+            font-size: 15px;
+            transition: border-color .2s ease, background .2s ease;
+        }
+
+        .metadata-field input:focus {
+            outline: none;
+            border-color: #ff6b35;
+            background: rgba(255, 107, 53, 0.14);
+        }
+
+        .modal-body {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 28px;
+            margin-top: 28px;
+        }
+
+        @media (max-width: 720px) {
+            .modal-body {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .cover-preview {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px dashed rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            text-align: center;
+        }
+
+        .cover-preview img {
+            width: 180px;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 14px;
+            border: 2px solid rgba(255, 107, 53, 0.3);
+            background: #0f0f0f;
+        }
+
+        .cover-preview button {
+            width: 100%;
+        }
+
+        .file-chip {
+            margin-top: 14px;
+            background: rgba(255, 107, 53, 0.12);
+            color: #ffb38f;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-footer {
+            margin-top: 32px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* Player */
+        .player {
+            position: fixed;
+            left: 12px;
+            right: 12px;
+            bottom: 12px;
+            z-index: 20;
+            background: #121217;
+            border: 1px solid #23232a;
+            border-radius: 16px;
+            padding: 10px 12px;
+            display: grid;
+            grid-template-columns: 300px 140px 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .player .track {
+            min-width: 0;
+            max-width: 300px;
+        }
+
+        .player .track>div {
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .t-title,
+        .t-artist {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .player .controls {
+            min-width: 140px;
+            max-width: 140px;
+        }
+
+        .player .progress {
+            min-width: 0;
+            justify-content: flex-end;
+        }
+
+        .track {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .track img {
+            width: 52px;
+            height: 52px;
+            border-radius: 10px;
+            object-fit: cover;
+            background: #222;
+            flex-shrink: 0;
+        }
+
+        .t-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .t-artist {
+            color: #8b8b93;
+            font-size: 12px;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            border: 1px solid #2a2a31;
+            background: #1b1b21;
+            color: #fff;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .icon-btn.primary {
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            border-color: transparent;
+        }
+
+        .progress {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bar {
+            position: relative;
+            height: 6px;
+            width: 360px;
+            max-width: 40vw;
+            background: #22222a;
+            border-radius: 999px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .bar .fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+        }
+
+        .time {
+            font-size: 12px;
+            color: #8b8b93;
+            flex-shrink: 0;
+        }
+
+        .time-display {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .time-separator {
+            color: #555;
+            font-size: 11px;
+        }
+
+        /* ================================
+           RESPONSIVE MOBILE DESIGN
+           ================================ */
+
+        /* Menu hamburger mobile */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #0d0d0d;
+            border-top: 1px solid #2a2a2a;
+            padding: 8px 0;
+            z-index: 100;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .mobile-nav-items {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .mobile-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            color: #999;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .mobile-nav-item i {
+            width: 24px;
+            height: 24px;
+        }
+
+        .mobile-nav-item.active {
+            color: #ff6b35;
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        /* Overlay pour le menu */
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 90;
+            backdrop-filter: blur(4px);
+        }
+
+        .mobile-overlay.active {
+            display: block;
+        }
+
+        /* Media queries pour mobile */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                padding-bottom: 250px; /* Espace pour nav mobile + player + marge */
+            }
+
+            /* Cacher la sidebar desktop */
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 280px;
+                height: 100vh;
+                z-index: 95;
+                transition: left 0.3s ease;
+                border-right: 1px solid #2a2a2a;
+                box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            /* Afficher la navigation mobile */
+            .mobile-nav {
+                display: block;
+            }
+
+            /* Main content prend toute la largeur */
+            .main-content {
+                width: 100%;
+                padding: 16px;
+                padding-bottom: 200px; /* Espace en bas pour le scroll */
+            }
+
+            /* Header plus compact */
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .header p {
+                font-size: 14px;
+            }
+
+            /* Bouton logout plus petit */
+            .logout-btn {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+
+            /* Grilles adaptatives */
+            .cards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 12px;
+            }
+
+            .songs-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 16px;
+            }
+
+            .genres-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 12px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            /* Cartes plus compactes */
+            .card {
+                padding: 12px;
+            }
+
+            .card-image {
+                height: 140px;
+            }
+
+            .card-title {
+                font-size: 14px;
+            }
+
+            .card-subtitle {
+                font-size: 12px;
+            }
+
+            /* Import zone plus compact */
+            .import-zone {
+                padding: 24px;
+            }
+
+            .import-icon {
+                font-size: 48px;
+            }
+
+            /* Modals en plein écran sur mobile */
+            .modal-overlay {
+                padding: 0;
+            }
+
+            .modal-panel {
+                width: 100%;
+                height: 100%;
+                border-radius: 0;
+                max-height: 100vh;
+                overflow-y: auto;
+            }
+
+            .modal-body {
+                grid-template-columns: 1fr;
+            }
+
+            .metadata-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* Player mobile optimisé */
+            .player {
+                left: 0;
+                right: 0;
+                bottom: 75px; /* Au-dessus de la nav mobile avec plus d'espace */
+                padding: 16px;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                border-radius: 0;
+                background: #0d0d0d;
+                border: none;
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+            }
+
+            .player .track {
+                max-width: 100%;
+                width: 100%;
+                justify-content: flex-start;
+                order: 1;
+            }
+
+            .player .track img {
+                width: 48px;
+                height: 48px;
+            }
+
+            .player .controls {
+                order: 3;
+                justify-content: center;
+                align-items: center;
+                gap: 24px;
+                width: 100%;
+            }
+
+            .player .progress {
+                order: 2;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .bar {
+                width: 100%;
+                height: 8px;
+                max-width: 100%;
+                background: #22222a;
+                border-radius: 999px;
+            }
+
+            .bar .fill {
+                height: 100%;
+            }
+
+            .time {
+                font-size: 13px;
+                font-weight: 500;
+                color: #8b8b93;
+            }
+
+            .time-display {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+            }
+
+            .time-separator {
+                color: #555;
+                font-size: 12px;
+            }
+
+            .icon-btn {
+                width: 52px;
+                height: 52px;
+            }
+
+            .icon-btn.primary {
+                width: 64px;
+                height: 64px;
+            }
+
+            .icon-btn i {
+                width: 24px;
+                height: 24px;
+            }
+
+            .icon-btn.primary i {
+                width: 28px;
+                height: 28px;
+            }
+
+            /* Liste items plus compacts */
+            .list-item {
+                padding: 12px 16px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            /* Boutons pleine largeur sur mobile */
+            .btn {
+                width: 100%;
+            }
+
+            /* Section title plus petit */
+            .section-title {
+                font-size: 20px;
+            }
+
+            /* Genre cards plus petits */
+            .genre-card {
+                padding: 20px 16px;
+                font-size: 14px;
+            }
+
+            /* Formulaire playlist */
+            #playlistModal > div {
+                width: 100%;
+                height: 100%;
+                border-radius: 0;
+            }
+
+            /* Vue détaillée playlist */
+            #playlist-detail-view > div:first-child {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            #playlist-detail-view > div:first-child button {
+                width: 100%;
+            }
+
+            #playlist-detail-title {
+                font-size: 24px !important;
+            }
+
+            /* Modal ajout chansons */
+            #addSongsModal > div {
+                width: 100%;
+                height: 100%;
+                border-radius: 0;
+                max-width: 100%;
+            }
+
+            /* Song cards responsive */
+            .song-card {
+                padding: 12px;
+            }
+
+            .song-card img {
+                margin-bottom: 8px;
+            }
+
+            .song-card .song-title {
+                font-size: 14px;
+            }
+
+            .song-card .song-artist {
+                font-size: 12px;
+            }
+
+            /* Remove song button plus visible sur mobile */
+            .remove-song-btn {
+                opacity: 1 !important;
+                background: rgba(0,0,0,0.85) !important;
+            }
+        }
+
+        /* Très petits écrans (< 375px) */
+        @media (max-width: 374px) {
+            .cards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+
+            .songs-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            }
+
+            .mobile-nav-item {
+                padding: 6px 10px;
+                font-size: 10px;
+            }
+
+            .mobile-nav-item i {
+                width: 20px;
+                height: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <span class="logo-icon"><i data-lucide="music"></i></span>
+                <span>MusicStream</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-target="accueil">
+                    <span class="nav-icon"><i data-lucide="library"></i></span> Accueil
+                </li>
+                <li class="nav-item" data-target="blindtest">
+                    <span class="nav-icon"><i data-lucide="trophy"></i></span> Blind Test
+                </li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <button id="logoutBtn" class="btn btn-secondary logout-btn">
+                <i data-lucide="log-out"></i> Déconnexion
+            </button>
+
+            <div id="accueil" class="section active">
+                <div class="header">
+                    <h1>Bienvenue, <span id="user-home"></span> !</h1>
+                    <p>Gérez votre collection musicale</p>
+                </div>
+
+                <div id="importZone" class="import-zone">
+                    <div class="import-icon">
+                        <i data-lucide="upload" style="width:64px;height:64px;stroke-width:1.5"></i>
+                    </div>
+                    <div style="font-size:20px; font-weight:600; margin-bottom:8px;">Importer mes MP3's</div>
+                    <div style="color:#999;">Glissez-déposez vos fichiers ou cliquez pour parcourir</div>
+                </div>
+                <div id="uploadProgress" class="upload-progress">
+                    <div class="upload-bar">
+                        <div id="uploadFill" class="upload-fill"></div>
+                    </div>
+                    <div id="uploadText" class="upload-text">0%</div>
+                </div>
+
+                <div id="importModal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+                    <div class="modal-panel">
+                        <button id="closeImportModal" class="modal-close"
+                            aria-label="Fermer la fenêtre">&times;</button>
+                        <div class="modal-title">
+                            <i data-lucide="music-4" style="width:26px;height:26px;"></i>
+                            Importer un titre
+                        </div>
+                        <div class="modal-subtitle">
+                            Ajoutez votre fichier MP3 ou AAC, vérifiez ses métadonnées et ajustez-les avant l'envoi dans
+                            la bibliothèque.
+                        </div>
+                        <div id="modalDropZone" class="modal-import-area" role="button" tabindex="0">
+                            <i data-lucide="upload" style="width:48px;height:48px;stroke-width:1.4;"></i>
+                            <div style="font-size:18px;font-weight:600;">Déposez votre fichier audio ici</div>
+                            <small>MP3, M4A ou AAC - ou cliquez pour parcourir</small>
+                        </div>
+                        <div id="selectedFileChip" class="file-chip" style="display:none;">
+                            <i data-lucide="file-audio"></i>
+                            <span id="fileNameLabel"></span>
+                        </div>
+                        <div class="modal-body">
+                            <div>
+                                <div class="metadata-grid">
+                                    <div class="metadata-field">
+                                        <label for="songTitleInput">Titre</label>
+                                        <input id="songTitleInput" type="text" placeholder="Titre du morceau">
+                                    </div>
+                                    <div class="metadata-field">
+                                        <label for="songArtistInput">Artiste</label>
+                                        <input id="songArtistInput" type="text" placeholder="Nom de l'artiste">
+                                    </div>
+                                    <div class="metadata-field">
+                                        <label for="songAlbumInput">Album</label>
+                                        <input id="songAlbumInput" type="text" placeholder="Nom de l'album">
+                                    </div>
+                                    <div class="metadata-field">
+                                        <label for="songYearInput">Année</label>
+                                        <input id="songYearInput" type="number" placeholder="2024" min="1900"
+                                            max="2099">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="cover-preview">
+                                <img id="coverPreview" src="https://via.placeholder.com/300/1e1e24/FFFFFF?text=Cover"
+                                    alt="Aperçu de la couverture">
+                                <div id="coverStatusText" style="font-size:13px;color:#9c9c9c;">
+                                    Aucune couverture détectée
+                                </div>
+                                <button type="button" id="coverUploadButton" class="btn btn-secondary"
+                                    style="display:none;">
+                                    <i data-lucide="image"></i>
+                                    <span id="coverButtonLabel">Importer une image</span>
+                                </button>
+                                <input id="coverInput" type="file" accept="image/png,image/jpeg,image/webp"
+                                    style="display:none;">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" id="cancelImport" class="btn btn-secondary">Annuler</button>
+                            <button type="button" id="confirmImport" class="btn" disabled>Importer</button>
+                        </div>
+                        <input id="modalAudioInput" type="file" accept=".mp3,.m4a,.aac,audio/*" style="display:none;">
+                    </div>
+                </div>
+
+                <!-- ...existing code... -->
+                <div style="margin-top:18px;">
+                    <h3>Chansons disponibles</h3>
+                    <div id="songsList" class="cards-grid"></div>
+                </div>
+
+                <div style="margin-top:24px; display:flex; justify-content:space-between; align-items:center;">
+                    <h3>Mes playlists</h3>
+                    <button id="openCreatePlaylist" class="btn" style="width:auto;"><i data-lucide="plus"></i> Nouvelle
+                        playlist</button>
+                </div>
+                <div id="playlistsList" class="cards-grid" style="margin-top:12px;"></div>
+                <!-- Modal création playlist -->
+                <div id="playlistModal"
+                    style="display:none; position:fixed; inset:0; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); z-index:2000;">
+                    <div style="background:#000000; padding:18px; width:520px; border-radius:8px;">
+                        <h3>Créer une playlist</h3>
+                        <form id="playlistForm">
+                            <label>Nom de la playlist<br><input id="playlistName" type="text" required
+                                    style="width:100%; padding:8px; margin-top:6px;"></label><br><br>
+                            <div style="max-height:260px; overflow:auto; border:1px solid #ddd; padding:8px;">
+                                <div id="playlistSongsCheckboxes"></div>
+                            </div>
+                            <div style="text-align:right; margin-top:10px;">
+                                <button type="button" id="cancelPlaylist" class="btn btn-secondary">Annuler</button>
+                                <button type="submit" class="btn">Créer</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div id="blindtest" class="section">
+                    <div class="header">
+                        <h1>Blind Test<span id="user-blind"></span></h1>
+                        <p>Testez vos connaissances musicales</p>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">156</div>
+                            <div class="stat-label">Victoires</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">89%</div>
+                            <div class="stat-label">Taux de réussite</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">42</div>
+                            <div class="stat-label">Série actuelle</div>
+                        </div>
+                    </div>
+
+                    <div class="section-title">Mode Solo</div>
+                    <div class="card" style="margin-bottom:32px; padding:32px;">
+                        <div style="display:flex; align-items:center; gap:24px; margin-bottom:20px;">
+                            <div style="font-size:48px; color:#ff6b35;">
+                                <i data-lucide="target" style="width:48px;height:48px;stroke-width:1.5"></i>
+                            </div>
+                            <div>
+                                <div class="card-title" style="font-size:20px;">Défiez-vous personnellement</div>
+                                <div class="card-subtitle">Testez vos connaissances et améliorez votre score</div>
+                            </div>
+                        </div>
+                        <a class="btn" href="blindtest.html">
+                            <i data-lucide="play"></i> Lancer une partie solo
+                        </a>
+                    </div>
+                </div>
+
+                <section id="playlist-detail-view" class="section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <button class="btn btn-secondary" id="backToPlaylists" style="width:auto;">
+                            <i data-lucide="arrow-left"></i> Retour aux playlists
+                        </button>
+                        <button class="btn" id="addSongsToPlaylist" style="width:auto;">
+                            <i data-lucide="plus"></i> Ajouter des chansons
+                        </button>
+                    </div>
+
+                    <h1 id="playlist-detail-title" class="title-heading"
+                        style="margin-bottom: 10px; font-size: 32px; font-weight: 700;"></h1>
+                    <p id="playlist-detail-count" style="color: #bbb; font-size: 16px; margin-bottom: 30px;"></p>
+
+                    <div id="playlist-songs-container" class="songs-grid">
+                    </div>
+                </section>
+
+                <!-- Modal pour ajouter des chansons à la playlist -->
+                <div id="addSongsModal"
+                    style="display:none; position:fixed; inset:0; align-items:center; justify-content:center; background:rgba(0,0,0,0.75); z-index:2000;">
+                    <div style="background:#0d0d0d; padding:24px; width:600px; max-width:90%; border-radius:16px; border:1px solid #2a2a2a;">
+                        <h3 style="margin-bottom:16px; font-size:24px;">Ajouter des chansons</h3>
+                        <div style="max-height:400px; overflow:auto; border:1px solid #2a2a2a; padding:16px; border-radius:8px; margin-bottom:20px;">
+                            <div id="addSongsCheckboxes"></div>
+                        </div>
+                        <div style="text-align:right; display:flex; gap:12px; justify-content:flex-end;">
+                            <button type="button" id="cancelAddSongs" class="btn btn-secondary">Annuler</button>
+                            <button type="button" id="confirmAddSongs" class="btn">Ajouter</button>
+                        </div>
+                    </div>
+                </div>
+        </main>
+    </div>
+
+    <!-- Navigation mobile (bottom nav) -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-items">
+            <div class="mobile-nav-item active" data-target="accueil">
+                <i data-lucide="library"></i>
+                <span>Accueil</span>
+            </div>
+            <div class="mobile-nav-item" data-target="blindtest">
+                <i data-lucide="trophy"></i>
+                <span>Blind Test</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Overlay pour fermer la sidebar sur mobile -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <!-- Lecteur audio persistant -->
+    <footer class="player" aria-label="Lecteur audio">
+        <div class="track">
+            <img id="player-cover" alt="Cover" />
+            <div>
+                <div id="player-title" class="t-title">Sélectionnez un titre</div>
+                <div id="player-artist" class="t-artist"></div>
+            </div>
+        </div>
+        <div class="controls">
+            <button id="prev-btn" class="icon-btn" title="Précédent">
+                <i data-lucide="skip-back"></i>
+            </button>
+            <button id="play-pause-btn" class="icon-btn primary" title="Lecture/Pause">
+                <i data-lucide="play"></i>
+            </button>
+            <button id="next-btn" class="icon-btn" title="Suivant">
+                <i data-lucide="skip-forward"></i>
+            </button>
+        </div>
+        <div class="progress">
+            <div class="bar">
+                <div id="progress-fill" class="fill"></div>
+            </div>
+            <div class="time-display">
+                <span id="current-time" class="time">0:00</span>
+                <span class="time-separator">/</span>
+                <span id="total-time" class="time">0:00</span>
+            </div>
+        </div>
+        <audio id="audio-element" preload="metadata"></audio>
+    </footer>
+
+    <script>
+        // Redirection si pas authentifié
+        if (!localStorage.getItem('token')) {
+            window.location.href = 'login.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const username = localStorage.getItem('username') || 'utilisateur';
+            const setText = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+            setText('user-home', username);
+
+            const logoutBtn = document.getElementById('logoutBtn');
+            const visibleLogoutSections = new Set(['accueil']);
+
+            const toggleLogoutVisibility = (sectionId) => {
+                if (!logoutBtn) return;
+                const shouldShow = visibleLogoutSections.has(sectionId);
+                logoutBtn.style.display = shouldShow ? 'inline-flex' : 'none';
+            };
+
+            
+            // Nav
+            const setActive = (id, item) => {
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+
+                // Assure que la vue demandée existe avant de l'activer
+                const targetElement = document.getElementById(id);
+                if (targetElement) {
+                    targetElement.classList.add('active');
+                }
+
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                if (item) item.classList.add('active');
+                toggleLogoutVisibility(id);
+            };
+            document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('click', () => setActive(item.dataset.target, item)));
+
+            // Logout
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('username');
+                    localStorage.removeItem('role');
+                    window.location.href = 'login.html';
+                });
+                const activeSection = document.querySelector('.section.active');
+                toggleLogoutVisibility(activeSection ? activeSection.id : '');
+            }
+
+            // Upload modal workflow
+            const importZone = document.getElementById('importZone');
+            const modal = document.getElementById('importModal');
+            const modalDropZone = document.getElementById('modalDropZone');
+            const modalAudioInput = document.getElementById('modalAudioInput');
+            const fileChip = document.getElementById('selectedFileChip');
+            const fileNameLabel = document.getElementById('fileNameLabel');
+            const confirmImportBtn = document.getElementById('confirmImport');
+            const cancelImportBtn = document.getElementById('cancelImport');
+            const closeImportBtn = document.getElementById('closeImportModal');
+            const coverPreview = document.getElementById('coverPreview');
+            const coverStatusText = document.getElementById('coverStatusText');
+            const coverUploadButton = document.getElementById('coverUploadButton');
+            const coverButtonLabel = document.getElementById('coverButtonLabel');
+            const coverInput = document.getElementById('coverInput');
+            const titleInput = document.getElementById('songTitleInput');
+            const artistInput = document.getElementById('songArtistInput');
+            const albumInput = document.getElementById('songAlbumInput');
+            const yearInput = document.getElementById('songYearInput');
+            const progressWrap = document.getElementById('uploadProgress');
+            const progressFill = document.getElementById('uploadFill');
+            const progressText = document.getElementById('uploadText');
+            const coverPlaceholder = 'https://via.placeholder.com/300/1e1e24/FFFFFF?text=Cover';
+
+            let selectedAudioFile = null;
+            let selectedCoverFile = null;
+            let currentCoverUrl = null;
+
+            function resetProgress() {
+                if (progressFill) progressFill.style.width = '0%';
+                if (progressText) progressText.textContent = '0%';
+            }
+
+            function showProgress(pct) {
+                if (!progressWrap) return;
+                progressWrap.style.display = 'flex';
+                if (progressFill) progressFill.style.width = pct + '%';
+                if (progressText) progressText.textContent = pct + '%';
+            }
+
+            function hideProgress() {
+                if (progressWrap) progressWrap.style.display = 'none';
+            }
+
+            function setCoverPreview({ src, message, showUpload = true, label }) {
+                if (currentCoverUrl && currentCoverUrl.startsWith('blob:')) {
+                    URL.revokeObjectURL(currentCoverUrl);
+                }
+                if (src && src.startsWith('blob:')) {
+                    currentCoverUrl = src;
+                } else {
+                    currentCoverUrl = null;
+                }
+                if (coverPreview) coverPreview.src = src || coverPlaceholder;
+                if (coverStatusText) coverStatusText.textContent = message;
+                if (coverUploadButton) coverUploadButton.style.display = showUpload ? 'block' : 'none';
+                if (coverButtonLabel) coverButtonLabel.textContent = label || 'Importer une image';
+            }
+
+            function resetModalState() {
+                selectedAudioFile = null;
+                selectedCoverFile = null;
+                if (fileChip) fileChip.style.display = 'none';
+                if (fileNameLabel) fileNameLabel.textContent = '';
+                [titleInput, artistInput, albumInput, yearInput].forEach((input) => { if (input) input.value = ''; });
+                if (modalAudioInput) modalAudioInput.value = '';
+                if (coverInput) coverInput.value = '';
+                setCoverPreview({ src: coverPlaceholder, message: 'Aucune couverture détectée', showUpload: true, label: 'Importer une image' });
+                if (confirmImportBtn) {
+                    confirmImportBtn.disabled = true;
+                    confirmImportBtn.textContent = 'Importer';
+                }
+            }
+
+            function openImportModal(prefillFile) {
+                if (!modal) return;
+                resetModalState();
+                modal.classList.add('active');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+                lucide.createIcons();
+                if (prefillFile) {
+                    handleAudioFile(prefillFile);
+                }
+            }
+
+            function closeImportModal(reset = true) {
+                if (!modal) return;
+                modal.classList.remove('active');
+                modal.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+                if (reset) resetModalState();
+            }
+
+            const allowedAudioMime = new Set(['audio/mpeg', 'audio/mp3', 'audio/aac', 'audio/x-m4a', 'audio/mp4']);
+            const allowedAudioExtensions = ['.mp3', '.aac', '.m4a'];
+
+            function isValidAudio(file) {
+                if (!file) return false;
+                if (allowedAudioMime.has(file.type)) return true;
+                const name = (file.name || '').toLowerCase();
+                return allowedAudioExtensions.some(ext => name.endsWith(ext));
+            }
+
+            function formatTag(value) {
+                if (Array.isArray(value)) {
+                    return value.filter(Boolean).join(', ');
+                }
+                return value || '';
+            }
+
+            function handleMetadata(tags, fallbackTitle) {
+                const titleTag = tags ? formatTag(tags.title) : '';
+                const artistTag = tags ? formatTag(tags.artist) : '';
+                const albumTag = tags ? formatTag(tags.album) : '';
+                const yearTag = tags ? formatTag(tags.year) : '';
+
+                if (titleInput) titleInput.value = titleTag || fallbackTitle || titleInput.value;
+                if (artistInput) artistInput.value = artistTag;
+                if (albumInput) albumInput.value = albumTag;
+                if (yearInput) yearInput.value = yearTag && /^[0-9]{2,4}$/.test(yearTag) ? yearTag.substring(0, 4) : '';
+
+                if (tags && tags.picture && tags.picture.data?.length) {
+                    try {
+                        const { data, format } = tags.picture;
+                        const blob = new Blob([new Uint8Array(data)], { type: format || 'image/jpeg' });
+                        const url = URL.createObjectURL(blob);
+                        setCoverPreview({
+                            src: url,
+                            message: 'Couverture détectée dans le fichier',
+                            showUpload: true,
+                            label: 'Changer la couverture'
+                        });
+                        selectedCoverFile = null;
+                        return;
+                    } catch (err) {
+                        console.warn('Impossible de lire la couverture intégrée:', err);
+                    }
+                }
+
+                setCoverPreview({
+                    src: coverPlaceholder,
+                    message: 'Aucune couverture détectée',
+                    showUpload: true,
+                    label: 'Importer une image'
+                });
+            }
+
+            function readMetadata(file) {
+                const fallbackTitle = (file.name || '').replace(/\.[^/.]+$/, '');
+                if (!window.jsmediatags) {
+                    handleMetadata(null, fallbackTitle);
+                    return;
+                }
+                window.jsmediatags.read(file, {
+                    onSuccess: ({ tags }) => {
+                        handleMetadata(tags, fallbackTitle);
+                    },
+                    onError: (error) => {
+                        console.warn('Lecture des métadonnées impossible:', error);
+                        handleMetadata(null, fallbackTitle);
+                    }
+                });
+            }
+
+            function handleAudioFile(file) {
+                if (!file) return;
+                if (!isValidAudio(file)) {
+                    alert('Format non supporté. Merci de sélectionner un fichier MP3 ou AAC.');
+                    return;
+                }
+                selectedAudioFile = file;
+                selectedCoverFile = null;
+
+                if (fileChip) fileChip.style.display = 'flex';
+                if (fileNameLabel) fileNameLabel.textContent = file.name;
+                if (confirmImportBtn) confirmImportBtn.disabled = false;
+
+                const fallbackTitle = (file.name || '').replace(/\.[^/.]+$/, '');
+                if (titleInput) titleInput.value = fallbackTitle;
+                if (artistInput) artistInput.value = '';
+                if (albumInput) albumInput.value = '';
+                if (yearInput) yearInput.value = '';
+
+                setCoverPreview({
+                    src: coverPlaceholder,
+                    message: 'Analyse des métadonnées en cours...',
+                    showUpload: false,
+                    label: 'Importer une image'
+                });
+
+                readMetadata(file);
+            }
+
+            function handleCoverSelection(file) {
+                if (!file) return;
+                const allowedImages = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+                if (!allowedImages.includes(file.type)) {
+                    alert('Format image non supporté. Utilisez PNG, JPG ou WEBP.');
+                    return;
+                }
+                selectedCoverFile = file;
+                const url = URL.createObjectURL(file);
+                setCoverPreview({
+                    src: url,
+                    message: 'Couverture personnalisée sélectionnée',
+                    showUpload: true,
+                    label: 'Changer la couverture'
+                });
+            }
+
+            function uploadSong({ audioFile, coverFile, metadata }) {
+                if (!audioFile) return;
+
+                resetProgress();
+                showProgress(0);
+
+                const formData = new FormData();
+                formData.append('audioFile', audioFile);
+
+                if (metadata.title) formData.append('title', metadata.title);
+                if (metadata.artist) formData.append('artistName', metadata.artist);
+                if (metadata.album) formData.append('albumTitle', metadata.album);
+                if (metadata.year) formData.append('year', metadata.year);
+                if (coverFile) formData.append('coverFile', coverFile);
+
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '/api/songs/upload', true);
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable) {
+                        const pct = Math.round((e.loaded / e.total) * 100);
+                        showProgress(pct);
+                    }
+                };
+                xhr.onload = () => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        showProgress(100);
+                        setTimeout(hideProgress, 600);
+                        setTimeout(() => window.location.reload(), 1000);
+                    } else {
+                        if (progressText) progressText.textContent = 'Erreur';
+                        setTimeout(hideProgress, 2000);
+                        alert('Erreur lors de l\'import. Veuillez réessayer.');
+                    }
+                };
+                xhr.onerror = () => {
+                    if (progressText) progressText.textContent = 'Erreur réseau';
+                    setTimeout(hideProgress, 2000);
+                    alert('Erreur réseau lors de l\'import.');
+                };
+                xhr.send(formData);
+            }
+
+            if (importZone) {
+                importZone.addEventListener('click', () => openImportModal());
+                importZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    importZone.classList.add('dragover');
+                });
+                importZone.addEventListener('dragleave', () => {
+                    importZone.classList.remove('dragover');
+                });
+                importZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    importZone.classList.remove('dragover');
+                    const file = e.dataTransfer?.files?.[0];
+                    openImportModal();
+                    if (file) handleAudioFile(file);
+                });
+            }
+
+            if (modalDropZone && modalAudioInput) {
+                modalDropZone.addEventListener('click', () => modalAudioInput.click());
+                modalDropZone.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        modalAudioInput.click();
+                    }
+                });
+                modalDropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    modalDropZone.classList.add('dragover');
+                });
+                ['dragleave', 'dragend'].forEach(evt => {
+                    modalDropZone.addEventListener(evt, () => modalDropZone.classList.remove('dragover'));
+                });
+                modalDropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    modalDropZone.classList.remove('dragover');
+                    const file = e.dataTransfer?.files?.[0];
+                    if (file) handleAudioFile(file);
+                });
+
+                modalAudioInput.addEventListener('change', (e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleAudioFile(file);
+                    modalAudioInput.value = '';
+                });
+            }
+
+            if (coverUploadButton && coverInput) {
+                coverUploadButton.addEventListener('click', () => coverInput.click());
+                coverInput.addEventListener('change', (e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleCoverSelection(file);
+                    coverInput.value = '';
+                });
+            }
+
+            [cancelImportBtn, closeImportBtn].forEach(btn => {
+                if (btn) btn.addEventListener('click', () => closeImportModal());
+            });
+
+            if (modal) {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) closeImportModal();
+                });
+            }
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modal?.classList.contains('active')) {
+                    closeImportModal();
+                }
+            });
+
+            if (confirmImportBtn) {
+                confirmImportBtn.addEventListener('click', () => {
+                    if (!selectedAudioFile) return;
+
+                    const trimmedTitle = titleInput?.value.trim() || '';
+                    const trimmedArtist = artistInput?.value.trim() || '';
+                    const trimmedAlbum = albumInput?.value.trim() || '';
+                    const trimmedYear = yearInput?.value.trim() || '';
+
+                    const cleanedYear = /^\d{4}$/.test(trimmedYear) ? trimmedYear : '';
+
+                    const metadata = {
+                        title: trimmedTitle || (selectedAudioFile.name || '').replace(/\.[^/.]+$/, ''),
+                        artist: trimmedArtist || 'Artiste inconnu',
+                        album: trimmedAlbum || 'Single',
+                        year: cleanedYear
+                    };
+
+                    const audioFile = selectedAudioFile;
+                    const coverFile = selectedCoverFile;
+
+                    closeImportModal();
+                    uploadSong({ audioFile, coverFile, metadata });
+                });
+            }
+
+            // ============================================
+            // NAVIGATION MOBILE
+            // ============================================
+            const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
+            const mobileOverlay = document.getElementById('mobileOverlay');
+            const sidebar = document.querySelector('.sidebar');
+
+            // Navigation mobile - changer de section
+            mobileNavItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const target = item.dataset.target;
+
+                    // Mettre à jour la section active
+                    setActive(target, null);
+
+                    // Mettre à jour les items actifs de la nav mobile
+                    mobileNavItems.forEach(navItem => navItem.classList.remove('active'));
+                    item.classList.add('active');
+
+                    // Fermer la sidebar si ouverte
+                    sidebar.classList.remove('active');
+                    mobileOverlay.classList.remove('active');
+
+                    // Re-créer les icônes
+                    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                        window.lucide.createIcons();
+                    }
+                });
+            });
+
+            // Fermer la sidebar en cliquant sur l'overlay
+            mobileOverlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                mobileOverlay.classList.remove('active');
+            });
+
+            // Synchroniser la nav mobile avec la nav desktop
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const originalClick = item.onclick;
+                item.addEventListener('click', () => {
+                    const target = item.dataset.target;
+                    // Mettre à jour aussi la nav mobile
+                    mobileNavItems.forEach(navItem => {
+                        if (navItem.dataset.target === target) {
+                            mobileNavItems.forEach(n => n.classList.remove('active'));
+                            navItem.classList.add('active');
+                        }
+                    });
+                });
+            });
+
+            // Initialiser Lucide icons
+            lucide.createIcons();
+        });
+    </script>
+    <script src="app.js"></script>
+</body>
+
+</html>
