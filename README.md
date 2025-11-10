@@ -86,6 +86,39 @@ Projet/
 
 ---
 
+## 📦 Cloner & tester rapidement
+
+1. **Récupérer le code**  
+   ```bash
+   git clone git@github.com:Raphael-Moris/music_stream.git
+   cd music_stream
+   # ou en HTTPS :
+   # git clone https://github.com/Raphael-Moris/music_stream.git
+   ```
+2. **Préparer l’environnement**  
+   ```bash
+   cp .env.docker .env          # copy .env.docker .env sous PowerShell
+   ```
+3. **Démarrer la stack**  
+   ```bash
+   docker compose up --build
+   ```
+4. **Tester**  
+   - Interface : [http://localhost:3500](http://localhost:3500)  
+   - Admin : `/admin.html` – BlindTest : `/blindtest.html`
+5. **Vérifier Mongo (optionnel)**  
+   ```bash
+   docker compose exec mongodb \
+     mongosh Streaming_platform --eval "db.users.countDocuments()"
+   ```
+6. **Arrêter**  
+   ```bash
+   docker compose down
+   # ou docker compose stop pour conserver les conteneurs
+   ```
+
+---
+
 ## 🧪 Vérifications rapides
 
 ```bash

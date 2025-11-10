@@ -14,6 +14,7 @@ logs/
 temp/
 backend/data/uploads/
 .cache/
+.claude/
 coverage/
 dist/
 build/
@@ -44,4 +45,3 @@ desktop.ini
 *.zip
 *.tar
 *.tar.gz
-
