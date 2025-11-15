@@ -11,12 +11,18 @@ echo "=========================================="
 sleep 5
 
 # Vérifier si le répertoire de backup existe
-if [ -d "/docker-entrypoint-initdb.d/backup/Streaming_platform" ]; then
-    echo "📂 Répertoire de backup trouvé : /docker-entrypoint-initdb.d/backup/Streaming_platform"
+if [ -d "/docker-entrypoint-initdb.d/backup" ]; then
+    echo "📂 Répertoire de backup trouvé : /docker-entrypoint-initdb.d/backup"
 
-    # Restaurer les données depuis les fichiers BSON
-    echo "📥 Restauration des données..."
-    mongorestore --db=Streaming_platform /docker-entrypoint-initdb.d/backup/Streaming_platform
+    # Vérifier s'il y a des fichiers BSON
+    if ls /docker-entrypoint-initdb.d/backup/*.bson 1> /dev/null 2>&1; then
+        # Restaurer les données depuis les fichiers BSON
+        echo "📥 Restauration des données..."
+        mongorestore --db=Streaming_platform /docker-entrypoint-initdb.d/backup
+    else
+        echo "⚠️ Aucun fichier BSON trouvé dans le backup."
+        exit 1
+    fi
 
     if [ $? -eq 0 ]; then
         echo "✅ Restauration réussie !"

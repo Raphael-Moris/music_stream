@@ -136,11 +136,135 @@ Docker reste toutefois l’environnement de référence pour les démonstrations
 
 ---
 
-## 📚 Documentation & support
+## 📚 Documentation complète
 
-- `README-DOCKER.md` : procédures avancées, sauvegarde/restauration, FAQ.
-- Scripts utiles : `init-mongo.sh`, `fix-email-index.js`, `check-songs-duration.js`.
-- Page diagnostic : `http://localhost:3500/diagnostic.html`.
+### Documentation principale
+
+Ce projet dispose d'une documentation complète et détaillée pour faciliter l'installation, l'utilisation et le rendu :
+
+| Document | Description | Lien |
+|----------|-------------|------|
+| **Guide de démarrage rapide** | Ce fichier (installation Docker en 3 étapes) | [README.md](./README.md) |
+| **Documentation technique** | Installation complète, configuration, utilisation, tests, troubleshooting | [docs/documentation_technique.md](./docs/documentation_technique.md) |
+| **Guide Docker** | Commandes Docker avancées, volumes, réseaux, optimisation | [docs/README-DOCKER.md](./docs/README-DOCKER.md) |
+| **Référence API** | Tous les endpoints REST et WebSocket avec exemples curl | [docs/api_reference.md](./docs/api_reference.md) |
+| **Contenu du projet** | Liste complète des fichiers et ordre de lancement | [docs/project_contents.txt](./docs/project_contents.txt) |
+| **Guide de rendu** | Instructions pour préparer l'archive ZIP finale | [docs/guide_rendu.md](./docs/guide_rendu.md) |
+
+### Configuration
+
+| Fichier | Description |
+|---------|-------------|
+| `.env.example` | Template des variables d'environnement (sans secrets) |
+| `.env.docker` | Configuration Docker prête à l'emploi |
+
+### Outils et scripts utiles
+
+- `init-mongo.sh` : Script d'initialisation et import automatique MongoDB
+- `fix-email-index.js` : Réparation des index MongoDB (legacy)
+- `check-songs-duration.js` : Vérification des durées audio
+- `test-blindtest.js` : Test de la logique du blind test
+- `check-token.js` : Vérification des tokens JWT
+
+### Page de diagnostic
+
+Une page de diagnostic système est disponible pour vérifier l'état de l'application :
+
+**URL** : `http://localhost:3500/diagnostic.html`
+
+**Vérifications** :
+- Connexion API REST
+- Connexion MongoDB
+- Connexion Socket.io (multijoueur)
+- État des services
+
+### Identifiants de test
+
+**Compte administrateur** :
+- Identifiant : `admin`
+- Mot de passe : `admin`
+- Privilèges : Accès complet (gestion users, songs, playlists, statistiques)
+
+**Autres comptes** : Créer un compte via la page de connexion ou utiliser les utilisateurs importés depuis la base de données.
+
+### Points d'accès
+
+| Page | URL | Description |
+|------|-----|-------------|
+| Connexion | http://localhost:3500/login.html | Authentification |
+| Accueil | http://localhost:3500/ | Streaming musical |
+| Blind Test | http://localhost:3500/blindtest.html | Jeu blind test (solo/multi) |
+| Administration | http://localhost:3500/admin.html | Dashboard admin |
+| Diagnostic | http://localhost:3500/diagnostic.html | État du système |
+
+### API REST
+
+**Base URL** : `http://localhost:3500/api`
+
+**Endpoints principaux** :
+- `/api/auth` - Authentification (register, login)
+- `/api/songs` - Gestion des morceaux (CRUD)
+- `/api/playlists` - Gestion des playlists
+- `/api/blindtest` - Jeu blind test (solo/multiplayer)
+- `/api/profile` - Profil utilisateur
+- `/api/admin` - Administration (stats, gestion)
+
+**Documentation complète** : [docs/api_reference.md](./docs/api_reference.md)
+
+---
+
+## 📦 Préparation du rendu
+
+Pour préparer l'archive ZIP du projet pour le rendu, consultez le guide complet :
+
+**[docs/guide_rendu.md](./docs/guide_rendu.md)**
+
+Ce guide contient :
+- Checklist complète avant soumission
+- Instructions pour créer l'archive ZIP
+- Procédure de test de l'archive
+- Liste des fichiers à inclure/exclure
+- Troubleshooting des problèmes courants
+
+**Résumé rapide** :
+
+```bash
+# 1. Nettoyer le projet
+rm -rf node_modules
+
+# 2. Vérifier la documentation
+ls -la docs/
+
+# 3. Créer l'archive
+zip -r SAE_302_Streaming_Musical.zip . \
+  -x "node_modules/*" -x ".git/*" -x ".env" -x "*.log"
+
+# 4. Vérifier la taille (doit être < 200 Mo)
+du -h SAE_302_Streaming_Musical.zip
+```
+
+---
+
+## 🆘 Support et troubleshooting
+
+En cas de problème :
+
+1. **Consulter la documentation technique** : [docs/documentation_technique.md](./docs/documentation_technique.md) (section Troubleshooting)
+2. **Consulter le guide Docker** : [docs/README-DOCKER.md](./docs/README-DOCKER.md)
+3. **Vérifier les logs** : `docker compose logs -f`
+4. **Tester la page de diagnostic** : http://localhost:3500/diagnostic.html
+5. **Vérifier l'état des conteneurs** : `docker compose ps`
+
+### Problèmes courants
+
+| Problème | Solution rapide |
+|----------|----------------|
+| "Cannot connect to MongoDB" | `docker compose restart mongodb` |
+| "Port 3500 already in use" | Modifier `PORT` dans `.env` |
+| "JWT secret is not defined" | Vérifier que `.env` existe et contient `JWT_SECRET` |
+| Données non importées | `docker compose down -v` puis `docker compose up --build` |
+
+**Documentation complète** : [docs/documentation_technique.md#troubleshooting](./docs/documentation_technique.md#troubleshooting)
 
 ---
 
