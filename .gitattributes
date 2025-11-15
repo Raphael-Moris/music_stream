@@ -1,0 +1,5 @@
+# Force LF line endings for shell scripts (required for Docker/Linux)
+*.sh text eol=lf
+
+# Force LF for init scripts
+init-mongo.sh text eol=lf
