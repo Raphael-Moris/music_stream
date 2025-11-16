@@ -1,7 +1,20 @@
-﻿// Minimal streaming homepage logic wired to backend /api/songs
+/**
+ * Script principal de l'application de streaming musical
+ *
+ * Fonctionnalités :
+ * - Lecteur audio avec contrôles (play/pause, suivant/précédent, barre de progression)
+ * - Bibliothèque de chansons avec recherche
+ * - Gestion des playlists (création, édition, suppression, ajout/retrait de chansons)
+ * - Statistiques Blind Test
+ * - Navigation par onglets (Accueil, Blind Test, Bibliothèque, Profil)
+ *
+ * Architecture : IIFE (Immediately Invoked Function Expression) pour éviter la pollution du scope global
+ */
 (() => {
+  // URL de l'API pour les chansons
   const API_URL = '/api/songs';
 
+  // Références aux éléments DOM principaux
   const els = {
     recGrid: document.getElementById('recommendations-grid'),
     lastGrid: document.getElementById('recently-grid'),
@@ -19,13 +32,20 @@
     logout: document.getElementById('logoutBtn')
   };
 
+  // État global du lecteur
   const state = {
-    songs: [],
-    queue: [],
-    index: 0,
-    playing: false
+    songs: [],      // Toutes les chansons disponibles
+    queue: [],      // File d'attente de lecture
+    index: 0,       // Index de la chanson en cours
+    playing: false  // État de lecture (true si en cours)
   };
 
+  /**
+   * Formate un temps en secondes au format M:SS
+   *
+   * @param {number} sec - Temps en secondes
+   * @returns {string} Temps formaté (ex: "3:42")
+   */
   function fmt(sec) {
     if (!sec || isNaN(sec)) return '0:00';
     const m = Math.floor(sec / 60);
@@ -33,8 +53,13 @@
     return `${m}:${s.toString().padStart(2, '0')}`;
   }
 
+  /**
+   * Configure le lecteur avec une chanson
+   *
+   * @param {Object} track - La chanson à charger
+   */
   function setPlayer(track) {
-    // Gérer l'affichage de la couverture ou de l'icône
+    // Gérer l'affichage de la couverture ou de l'icône par défaut
     if (track.coverImage) {
       els.cover.src = track.coverImage;
       els.cover.style.display = 'block';
@@ -51,6 +76,11 @@
     els.audio.src = track.audioUrl;
   }
 
+  /**
+   * Met à jour l'affichage du bouton play/pause
+   *
+   * @param {boolean} isPlaying - true si en lecture
+   */
   function renderPlayButton(isPlaying) {
     if (!els.playPause) return;
     if (isPlaying) {
@@ -63,6 +93,11 @@
     }
   }
 
+  /**
+   * Lance la lecture d'une chanson par son index dans la queue
+   *
+   * @param {number} i - Index de la chanson dans la queue
+   */
   function playIndex(i) {
     if (state.queue.length === 0) return;
     state.index = (i + state.queue.length) % state.queue.length;
@@ -78,10 +113,19 @@
     });
   }
 
+  /**
+   * Met à jour l'icône play/pause
+   */
   function updatePlayIcon() {
     renderPlayButton(state.playing);
   }
 
+  /**
+   * Affiche une grille de chansons
+   *
+   * @param {HTMLElement} container - Conteneur où afficher la grille
+   * @param {Array} items - Tableau de chansons à afficher
+   */
   function renderGrid(container, items) {
     if (!container) return;
     container.innerHTML = items.map((t, idx) => `
@@ -104,6 +148,11 @@
     });
   }
 
+  /**
+   * Charge toutes les chansons depuis l'API
+   *
+   * @async
+   */
   async function loadSongs() {
     try {
       const res = await fetch(API_URL);
@@ -123,6 +172,9 @@
     }
   }
 
+  /**
+   * Initialise les contrôles du lecteur (boutons, événements)
+   */
   function bindControls() {
     els.playPause.addEventListener('click', () => {
       if (!els.audio.src) {
@@ -172,7 +224,14 @@
     });
   }
 
-  // Exposer la fonction pour mettre à jour la queue depuis la bibliothèque
+  /**
+   * Fonction globale pour mettre à jour la queue de lecture
+   * Utilisée par d'autres modules (bibliothèque, playlists)
+   *
+   * @param {Array} songs - Tableau de chansons pour la queue
+   * @param {number} index - Index de la chanson à jouer
+   * @param {boolean} autoplay - Lance automatiquement la lecture si true
+   */
   window.updatePlayerQueue = (songs, index, autoplay = true) => {
     state.queue = songs;
     state.index = index;
@@ -194,7 +253,18 @@
   });
 })();
 
-// Section bibliothèque et playlists
+// ========== SECTION BIBLIOTHÈQUE ET PLAYLISTS ==========
+
+/**
+ * Gestion de la bibliothèque musicale et des playlists
+ *
+ * Fonctionnalités :
+ * - Affichage et recherche dans la bibliothèque
+ * - Création/édition/suppression de playlists
+ * - Ajout/retrait de chansons dans les playlists
+ * - Upload de couvertures pour les playlists
+ * - Statistiques Blind Test
+ */
 document.addEventListener('DOMContentLoaded', () => {
   const songsList = document.getElementById('songsList');
   const openCreatePlaylist = document.getElementById('openCreatePlaylist');
@@ -207,15 +277,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const mainContent = document.querySelector('.main-content');
   const playlistDetailSection = document.getElementById('playlist-detail-view');
 
-  // Image par défaut pour les playlists (note à double crochet)
+  // Image SVG par défaut pour les playlists sans couverture (note de musique)
   const playlistCoverPlaceholder = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNmZjZiMzU7c3RvcC1vcGFjaXR5OjEiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNmZjhjNDI7c3RvcC1vcGFjaXR5OjEiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIgZmlsbD0idXJsKCNncmFkKSIgcng9IjIwIi8+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTgwLCAxMjApIj48cGF0aCBkPSJNIDcwIDIwIEwgNzAgMTYwIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iNiIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGNpcmNsZSBjeD0iNTAiIGN5PSIxNzAiIHI9IjIwIiBmaWxsPSIjZmZmIi8+PHBhdGggZD0iTSA3MCAyMCBMIDExMCA0MCBMIDExMCAxNDAgTCA3MCAxNjAgWiIgZmlsbD0iI2ZmZiIvPjxjaXJjbGUgY3g9IjkwIiBjeT0iMTUwIiByPSIyMCIgZmlsbD0iI2ZmNmIzNSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMTcwIiByPSIyMCIgZmlsbD0iI2ZmNmIzNSIvPjwvZz48L3N2Zz4=';
 
-  let allSongs = [];
-  let currentPlaylistSongs = []; // Pour stocker les chansons de la playlist actuellement affichée
-  let currentPlaylistIdForFilter = null; // Pour stocker l'ID de la playlist affichée
-  let selectedPlaylistCoverFile = null;
-  const token = localStorage.getItem('token');
+  // Variables d'état pour la bibliothèque et les playlists
+  let allSongs = [];                          // Toutes les chansons de la bibliothèque
+  let currentPlaylistSongs = [];              // Chansons de la playlist actuellement affichée
+  let currentPlaylistIdForFilter = null;      // ID de la playlist affichée (pour le filtrage)
+  let selectedPlaylistCoverFile = null;       // Fichier de couverture sélectionné lors de la création
+  const token = localStorage.getItem('token'); // Token JWT pour l'authentification
 
+  /**
+   * Fait défiler la page vers le haut de la section playlist
+   * Utilisé lors de l'ouverture d'une playlist pour améliorer l'UX
+   */
   const scrollToPlaylistTop = () => {
     requestAnimationFrame(() => {
       if (playlistDetailSection && typeof playlistDetailSection.scrollIntoView === 'function') {
@@ -235,6 +310,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
+  /**
+   * Charge toutes les chansons de la bibliothèque depuis l'API
+   *
+   * @async
+   */
   async function loadLibrarySongs() {
     try {
       const res = await fetch('/api/songs');
@@ -247,6 +327,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  /**
+   * Affiche les chansons de la bibliothèque avec filtrage optionnel
+   *
+   * @param {string} filter - Terme de recherche pour filtrer les chansons
+   */
   function renderSongs(filter = '') {
     if (!songsList) return;
     songsList.innerHTML = '';
@@ -907,6 +992,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ========== BLIND TEST STATS ==========
 
+  /**
+   * Charge et affiche les statistiques Blind Test de l'utilisateur
+   * Affiche : nombre de parties, précision moyenne, meilleur score, playlists récentes
+   *
+   * @async
+   */
   async function loadBlindTestStats() {
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
@@ -960,7 +1051,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Event listener pour la recherche dans les chansons disponibles
+  // ========== EVENT LISTENERS POUR LA RECHERCHE ==========
+
+  // Recherche dans les chansons de la bibliothèque
   const searchSongsInput = document.getElementById('searchSongs');
   if (searchSongsInput) {
     searchSongsInput.addEventListener('input', (e) => {
@@ -968,7 +1061,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Event listener pour la recherche dans la fenêtre de création de playlist
+  // Recherche dans la modale de création de playlist
   const searchPlaylistSongsInput = document.getElementById('searchPlaylistSongs');
   if (searchPlaylistSongsInput) {
     searchPlaylistSongsInput.addEventListener('input', (e) => {
@@ -976,7 +1069,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Event listener pour la recherche dans le détail de la playlist
+  // Recherche dans le détail de la playlist
   const searchPlaylistDetailSongsInput = document.getElementById('searchPlaylistDetailSongs');
   if (searchPlaylistDetailSongsInput) {
     searchPlaylistDetailSongsInput.addEventListener('input', (e) => {
@@ -986,7 +1079,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Fonction pour filtrer les checkboxes dans la fenêtre de création de playlist
+  /**
+   * Filtre les checkboxes de chansons dans la modale de création de playlist
+   *
+   * @param {string} filter - Terme de recherche
+   */
   function filterPlaylistCheckboxes(filter) {
     const checkboxes = playlistSongsCheckboxes.querySelectorAll('label');
     const searchTerm = filter.toLowerCase();
@@ -1001,7 +1098,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Initial load
+  // ========== CHARGEMENT INITIAL ==========
+
+  // Chargement des données au démarrage
   loadLibrarySongs();
   loadPlaylists();
   loadBlindTestStats();

@@ -6,19 +6,46 @@ const connectDB = require('./config/db');
 
 const app = express();
 
-// Connexion à MongoDB
-// Connexion à MongoDB (ne bloque pas le démarrage du serveur si la connexion échoue)
-connectDB().catch(err => {
-  console.warn('⚠️ Connexion MongoDB échouée (vérifer le par feu de votre connexion) :', err.message);
-});
+// ============================================================================
+// server.js — point d'entrée de l'application
+// - Configure et démarre le serveur Express.
+// - Charge la configuration (env), initialise la connexion à la base de données,
+//   configure les middlewares globaux (CORS, parsing, logging), monte les routes
+//   et installe la gestion centralisée des erreurs.
+// - Le fichier ne doit contenir que la configuration de haut niveau : la logique
+//   métier doit rester dans des modules / routes / contrôleurs séparés.
+// ============================================================================
 
-// Middleware CORS - IMPORTANT pour éviter les erreurs
+// ---------- Importations ----------
+// Import des bibliothèques tierces et des modules locaux.
+// Garder les imports organisés : Node core, puis packages externes, puis modules app.
+
+// Bibliothèques tierces
+const http = require('http');
+const { Server } = require('socket.io');
+
+// Modules locaux
+const authRoutes = require('./backend/routes/auth');
+const songRoutes = require('./backend/routes/songs');
+const playlistRoutes = require('./backend/routes/playlists');
+const blindtestRoutes = require('./backend/routes/blindtest');
+const profileRoutes = require('./backend/routes/profile');
+const adminRoutes = require('./backend/routes/admin');
+const BlindTestRoom = require('./backend/models/blindTestRoom');
+const Song = require('./backend/models/song');
+
+// ---------- Configuration des middlewares ----------
+// Middlewares globaux appliqués à toutes les requêtes : 
+// - express.json() / urlencoded() pour parser le body,
+// - helmet / cors pour sécurité et CORS,
+// - morgan ou autre logger pour les requêtes.
+// Documenter si un middleware est conditionnel (ex. only in dev).
+
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'] 
 }));
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -31,26 +58,38 @@ app.use((req, res, next) => {
 // Servir le frontend
 app.use(express.static(path.join(__dirname, 'frontend')));
 
-// Routes API
-app.use('/api/songs', require('./backend/routes/songs'));
-app.use('/api/playlists', require('./backend/routes/playlists'));
-app.use('/api/blindtest', require('./backend/routes/blindtest'));
-app.use('/api/profile', require('./backend/routes/profile'));
-app.use('/api/admin', require('./backend/routes/admin'));
+// ---------- Routes / API ----------
+// Montage des routeurs Express (ex : app.use('/api/users', usersRouter)).
+// Chaque routeur doit être responsable d'un domaine fonctionnel et 
+// déléguer la logique aux contrôleurs/services.
+
+app.use('/api/auth', authRoutes);
+app.use('/api/songs', songRoutes);
+app.use('/api/playlists', playlistRoutes);
+app.use('/api/blindtest', blindtestRoutes);
+app.use('/api/profile', profileRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Route racine
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend/login.html'));
 });
 
+// ---------- Connexion à la base de données ----------
+// Initialise la connexion à la BDD (ex : mongoose.connect ou pool SQL).
+// - Gérer proprement les erreurs de connexion (retry / exit).
+// - Utiliser les variables d'environnement pour chaîne de connexion.
+// - Fermer la connexion proprement lors d'un arrêt (SIGINT/SIGTERM).
 
+connectDB().catch(err => {
+  console.warn('⚠️ Connexion MongoDB échouée (vérifer le par feu de votre connexion) :', err.message);
+});
 
-const authRoutes = require('./backend/routes/auth');
-app.use('/api/auth', authRoutes);
+// ---------- Gestion des erreurs ----------
+// Middleware de gestion des erreurs centralisé : capturer les erreurs
+// synchrones et asynchrones, retourner un JSON standardisé {status, message, details?}.
+// Ne pas exposer de stack trace en production : contrôler via NODE_ENV.
 
-
-
-// Gestion des erreurs - IMPORTANT
 app.use((err, req, res, next) => {
   console.error('❌ Erreur serveur:', err);
 
@@ -66,8 +105,6 @@ const PORT = process.env.PORT || 5000;
 const HOST = '0.0.0.0'; // Écouter sur toutes les interfaces réseau
 
 // Créer serveur HTTP et attacher socket.io
-const http = require('http');
-const { Server } = require('socket.io');
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -77,8 +114,6 @@ const io = new Server(server, {
 });
 
 // ========== SOCKET.IO - ÉVÉNEMENTS MULTIJOUEUR ==========
-const BlindTestRoom = require('./backend/models/blindTestRoom');
-const Song = require('./backend/models/song');
 
 // Store des rooms actives en mémoire
 const activeRooms = new Map();
@@ -320,6 +355,12 @@ async function endGame(roomCode, room) {
 
   console.log(`Partie terminée dans salon ${roomCode}`);
 }
+
+// ---------- Démarrage du serveur ----------
+// Démarrer l'écoute sur le port configuré (process.env.PORT || 3000).
+// - Loguer l'environnement et le port au démarrage.
+// - Écouter les événements process (unhandledRejection, uncaughtException)
+//   et fermer proprement le serveur avant exit si nécessaire.
 
 server.listen(PORT, HOST, () => {
   const os = require('os');

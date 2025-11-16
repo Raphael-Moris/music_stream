@@ -1,3 +1,17 @@
+/**
+ * Feuille de style principale de l'application de streaming musical
+ *
+ * Organisation :
+ * - Reset et styles de base
+ * - Conteneurs et layout
+ * - Typographie
+ * - Formulaires et inputs
+ * - Boutons et interactions
+ * - Barres de progression
+ * - Messages et résultats
+ */
+
+/* ========== RESET ET STYLES DE BASE ========== */
 * {
     margin: 0;
     padding: 0;
@@ -11,6 +25,7 @@ body {
     padding: 20px;
 }
 
+/* ========== CONTENEURS ET LAYOUT ========== */
 .container {
     max-width: 800px;
     margin: 0 auto;
@@ -20,11 +35,13 @@ body {
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
 
+/* ========== TYPOGRAPHIE ========== */
 h1, h2 {
     color: #333;
     margin-bottom: 20px;
 }
 
+/* ========== FORMULAIRES ========== */
 .form-group {
     margin-bottom: 20px;
 }
@@ -36,6 +53,7 @@ label {
     color: #555;
 }
 
+/* Inputs de formulaire */
 input[type="text"],
 input[type="number"],
 input[type="file"] {
@@ -52,6 +70,7 @@ input:focus {
     border-color: #667eea;
 }
 
+/* ========== BOUTONS ========== */
 button {
     background: #667eea;
     color: white;
@@ -72,6 +91,7 @@ button:disabled {
     cursor: not-allowed;
 }
 
+/* ========== BARRES DE PROGRESSION ========== */
 #progress {
     margin: 20px 0;
 }
@@ -96,6 +116,7 @@ button:disabled {
     50% { width: 100%; }
 }
 
+/* ========== MESSAGES ET RÉSULTATS ========== */
 #result {
     padding: 15px;
     border-radius: 8px;

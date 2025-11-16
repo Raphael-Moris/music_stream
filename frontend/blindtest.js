@@ -1,3 +1,21 @@
+/**
+ * Script Blind Test - Mode solo et multijoueur
+ *
+ * Fonctionnalités :
+ * - Mode solo : parties individuelles avec statistiques sauvegardées
+ * - Mode multijoueur : création/rejoindre des salles avec WebSocket (Socket.io)
+ * - Système de questions avec timer (30s par défaut)
+ * - Score basé sur la rapidité et la précision
+ * - Double buffer audio pour transitions fluides
+ * - Gestion des playlists personnalisées
+ * - Statistiques et historique des parties
+ *
+ * Architecture :
+ * - Socket.io pour la communication temps réel (multijoueur)
+ * - API REST pour les parties solo
+ * - Double buffer audio (2 éléments <audio>) pour éviter les coupures
+ */
+
 // ========== CONFIGURATION ==========
 const API_BASE = window.location.origin;
 const token = localStorage.getItem('token');
@@ -8,22 +26,28 @@ const username = localStorage.getItem('username') || 'Joueur';
 const socket = io(API_BASE);
 
 // ========== STATE ==========
-let currentScreen = 'screen-mode-selection';
-let selectedPlaylistId = null;
-let currentGameData = null;
-let currentQuestionIndex = 0;
-let currentScore = 0;
-let gameAnswers = [];
-let questionStartTime = null;
-let timerInterval = null;
-let currentRoomCode = null;
-let currentAudioIndex = 0; // Pour le double buffer audio (0 ou 1)
-let audioElements = null; // Sera initialisé au démarrage du jeu (solo ou multi)
-let isHost = false;
-let hasAnswered = false; // Flag pour savoir si le joueur a déjà répondu à la question actuelle
+// État global de l'application Blind Test
+let currentScreen = 'screen-mode-selection';  // Écran actuellement affiché
+let selectedPlaylistId = null;                // ID de la playlist sélectionnée
+let currentGameData = null;                   // Données de la partie en cours
+let currentQuestionIndex = 0;                 // Index de la question actuelle
+let currentScore = 0;                         // Score du joueur
+let gameAnswers = [];                         // Réponses données pendant la partie
+let questionStartTime = null;                 // Timestamp du début de la question
+let timerInterval = null;                     // Interval pour le compte à rebours
+let currentRoomCode = null;                   // Code de la salle (mode multijoueur)
+let currentAudioIndex = 0;                    // Index du buffer audio actuel (0 ou 1)
+let audioElements = null;                     // Éléments audio pour le double buffering
+let isHost = false;                           // true si le joueur est l'hôte de la salle
+let hasAnswered = false;                      // true si le joueur a répondu à la question actuelle
 
 // ========== UTILITAIRES ==========
 
+/**
+ * Affiche un écran et masque les autres
+ *
+ * @param {string} screenId - ID de l'écran à afficher
+ */
 function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');

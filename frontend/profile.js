@@ -1,13 +1,32 @@
-// profile.js - Gestion du profil utilisateur
+/**
+ * Script de gestion du profil utilisateur
+ *
+ * Permet à l'utilisateur de :
+ * - Modifier son nom d'utilisateur
+ * - Changer son mot de passe
+ * - Gérer son image de profil (upload/suppression)
+ * - Visualiser les informations du compte
+ */
 
+// Construction de l'URL de l'API en fonction de l'environnement
 const API_URL = window.location.hostname === 'localhost'
     ? 'http://localhost:3500/api'
     : `http://${window.location.hostname}:3500/api`;
 
-// Fonction pour faire des appels API avec authentification
+/**
+ * Effectue un appel API avec authentification automatique via JWT
+ *
+ * @async
+ * @param {string} endpoint - Le endpoint de l'API (ex: '/profile')
+ * @param {Object} options - Options fetch (method, body, headers, etc.)
+ * @returns {Promise<Object>} La réponse JSON de l'API
+ * @throws {Error} Si la requête échoue ou si success est false
+ */
 async function apiCall(endpoint, options = {}) {
+    // Récupération du token JWT stocké lors de la connexion
     const token = localStorage.getItem('token');
 
+    // Configuration de la requête avec authentification
     const config = {
         ...options,
         headers: {
@@ -16,7 +35,7 @@ async function apiCall(endpoint, options = {}) {
         }
     };
 
-    // Ne pas ajouter Content-Type pour FormData
+    // Ne pas ajouter Content-Type pour FormData (géré automatiquement par le navigateur)
     if (!(options.body instanceof FormData)) {
         config.headers['Content-Type'] = 'application/json';
     }
@@ -24,6 +43,7 @@ async function apiCall(endpoint, options = {}) {
     const response = await fetch(`${API_URL}${endpoint}`, config);
     const data = await response.json();
 
+    // Lever une erreur si la requête a échoué
     if (!data.success) {
         throw new Error(data.error || 'Erreur lors de la requête');
     }
@@ -37,6 +57,13 @@ let passwordConfirmResolve = null;
 
 // ========== SYSTÈME DE NOTIFICATIONS ==========
 
+/**
+ * Affiche une notification toast dans le coin de l'écran
+ *
+ * @param {string} title - Titre de la notification
+ * @param {string} message - Message de la notification
+ * @param {string} type - Type de notification ('success', 'error', 'warning', 'info')
+ */
 function showNotification(title, message, type = 'info') {
     const container = document.getElementById('notificationContainer');
     if (!container) return;
@@ -76,9 +103,15 @@ function showNotification(title, message, type = 'info') {
     }, 5000);
 }
 
+/**
+ * Retire une notification de l'écran avec animation
+ *
+ * @param {HTMLElement} notification - L'élément notification à retirer
+ */
 function removeNotification(notification) {
     if (!notification || !notification.parentElement) return;
 
+    // Animation de sortie
     notification.classList.add('hiding');
     setTimeout(() => {
         if (notification.parentElement) {
@@ -89,6 +122,12 @@ function removeNotification(notification) {
 
 // ========== MODALE DE CONFIRMATION DE MOT DE PASSE ==========
 
+/**
+ * Affiche une modale pour demander le mot de passe utilisateur
+ * Utilisée lors du changement de nom d'utilisateur pour permettre la reconnexion automatique
+ *
+ * @returns {Promise<string|null>} Le mot de passe saisi ou null si annulé
+ */
 function showPasswordConfirmModal() {
     return new Promise((resolve) => {
         passwordConfirmResolve = resolve;
@@ -114,10 +153,16 @@ function showPasswordConfirmModal() {
     });
 }
 
+/**
+ * Ferme la modale de confirmation de mot de passe
+ *
+ * @param {string|null} password - Le mot de passe saisi ou null si annulé
+ */
 function closePasswordConfirmModal(password = null) {
     const modal = document.getElementById('passwordConfirmModal');
     modal.style.display = 'none';
 
+    // Résoudre la promise avec le mot de passe (ou null)
     if (passwordConfirmResolve) {
         passwordConfirmResolve(password);
         passwordConfirmResolve = null;
@@ -126,7 +171,12 @@ function closePasswordConfirmModal(password = null) {
 
 // ========== GESTION DU PROFIL ==========
 
-// Charger et afficher le profil
+/**
+ * Charge et affiche les informations du profil utilisateur
+ * Récupère le nom d'utilisateur, l'image de profil et le rôle
+ *
+ * @async
+ */
 async function loadProfile() {
     try {
         const response = await apiCall('/profile');
@@ -175,7 +225,10 @@ async function loadProfile() {
     }
 }
 
-// Basculer en mode édition du nom d'utilisateur
+/**
+ * Active le mode édition du nom d'utilisateur
+ * Affiche le champ de saisie à la place du texte
+ */
 function enableUsernameEdit() {
     document.getElementById('usernameDisplayMode').style.display = 'none';
     document.getElementById('usernameEditMode').style.display = 'flex';
@@ -183,7 +236,10 @@ function enableUsernameEdit() {
     lucide.createIcons();
 }
 
-// Annuler l'édition du nom d'utilisateur
+/**
+ * Annule l'édition du nom d'utilisateur
+ * Restaure l'affichage normal et réinitialise la valeur
+ */
 function cancelUsernameEdit() {
     document.getElementById('usernameEditMode').style.display = 'none';
     document.getElementById('usernameDisplayMode').style.display = 'flex';
@@ -191,7 +247,16 @@ function cancelUsernameEdit() {
     lucide.createIcons();
 }
 
-// Reconnexion automatique avec nouvelles credentials
+/**
+ * Reconnecte automatiquement l'utilisateur après un changement de credentials
+ * Nécessaire après un changement de nom d'utilisateur ou de mot de passe
+ *
+ * @async
+ * @param {string} username - Le nouveau nom d'utilisateur
+ * @param {string} password - Le mot de passe (nouveau ou actuel)
+ * @returns {Promise<boolean>} true si la reconnexion a réussi
+ * @throws {Error} Si la reconnexion échoue
+ */
 async function autoRelogin(username, password) {
     try {
         const res = await fetch('/api/auth/login', {
@@ -224,7 +289,13 @@ async function autoRelogin(username, password) {
     }
 }
 
-// Uploader une nouvelle image de profil
+/**
+ * Upload une nouvelle image de profil
+ * Vérifie la taille (max 5MB) et le format (JPG, PNG, WebP)
+ *
+ * @async
+ * @param {File} file - Le fichier image à uploader
+ */
 async function uploadProfileImage(file) {
     try {
         // Vérifier la taille du fichier (5MB max)
@@ -266,7 +337,12 @@ async function uploadProfileImage(file) {
     }
 }
 
-// Supprimer l'image de profil
+/**
+ * Supprime l'image de profil de l'utilisateur
+ * Demande confirmation avant suppression
+ *
+ * @async
+ */
 async function deleteProfileImage() {
     if (!confirm('Êtes-vous sûr de vouloir supprimer votre photo de profil ?')) {
         return;
@@ -295,7 +371,13 @@ async function deleteProfileImage() {
     }
 }
 
-// Mettre à jour le nom d'utilisateur
+/**
+ * Met à jour le nom d'utilisateur
+ * Demande le mot de passe pour reconnexion automatique
+ * Valide que le nom fait au moins 3 caractères
+ *
+ * @async
+ */
 async function updateUsername() {
     const newUsername = document.getElementById('profileUsernameInput').value.trim();
 
@@ -341,7 +423,16 @@ async function updateUsername() {
     }
 }
 
-// Mettre à jour le mot de passe
+/**
+ * Met à jour le mot de passe de l'utilisateur
+ * Valide :
+ * - Mot de passe actuel requis
+ * - Nouveau mot de passe >= 6 caractères
+ * - Confirmation correspond au nouveau mot de passe
+ * Reconnecte automatiquement l'utilisateur après changement
+ *
+ * @async
+ */
 async function updatePassword() {
     const currentPassword = document.getElementById('currentPassword').value;
     const newPassword = document.getElementById('newPassword').value;

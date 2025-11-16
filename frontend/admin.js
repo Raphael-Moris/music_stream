@@ -1,11 +1,30 @@
-// admin.js - Panneau d'administration
+/**
+ * Script du panneau d'administration
+ *
+ * Fonctionnalités :
+ * - Vue d'ensemble des statistiques (utilisateurs, chansons, playlists, parties)
+ * - Gestion des utilisateurs
+ * - Gestion des chansons (suppression)
+ * - Informations serveur et système
+ * - État de santé de la base de données
+ *
+ * Accès réservé aux utilisateurs avec le rôle "admin"
+ */
 
+// Construction de l'URL de l'API en fonction de l'environnement
 const API_URL = window.location.hostname === 'localhost'
     ? 'http://localhost:3500/api'
     : `http://${window.location.hostname}:3500/api`;
 
 // ========== SYSTÈME DE NOTIFICATIONS ==========
 
+/**
+ * Affiche une notification toast avec style personnalisé
+ *
+ * @param {string} title - Titre de la notification
+ * @param {string} message - Message de la notification
+ * @param {string} type - Type de notification ('success', 'error', 'warning', 'info')
+ */
 function showNotification(title, message, type = 'info') {
     const container = document.getElementById('notificationContainer');
     if (!container) return;
@@ -53,6 +72,15 @@ function showNotification(title, message, type = 'info') {
 
 // ========== API CALLS ==========
 
+/**
+ * Effectue un appel API avec authentification automatique
+ *
+ * @async
+ * @param {string} endpoint - Le endpoint de l'API (ex: '/admin/stats')
+ * @param {Object} options - Options fetch (method, body, headers, etc.)
+ * @returns {Promise<Object>} La réponse JSON de l'API
+ * @throws {Error} Si la requête échoue ou si success est false
+ */
 async function apiCall(endpoint, options = {}) {
     const token = localStorage.getItem('token');
 
@@ -77,6 +105,14 @@ async function apiCall(endpoint, options = {}) {
 
 // ========== VERIFY ADMIN ==========
 
+/**
+ * Vérifie que l'utilisateur connecté possède le rôle admin
+ * Redirige vers index.html si utilisateur normal
+ * Redirige vers login.html si non authentifié
+ *
+ * @async
+ * @returns {Promise<boolean>} true si l'utilisateur est admin
+ */
 async function verifyAdmin() {
     try {
         const response = await apiCall('/profile');
@@ -102,6 +138,12 @@ async function verifyAdmin() {
 
 // ========== LOAD STATS ==========
 
+/**
+ * Charge et affiche les statistiques globales de l'application
+ * Affiche : nombre d'utilisateurs, chansons, playlists, parties, taille BDD
+ *
+ * @async
+ */
 async function loadStats() {
     try {
         const response = await apiCall('/admin/stats');
@@ -175,6 +217,12 @@ async function loadStats() {
 
 // ========== LOAD USERS ==========
 
+/**
+ * Charge et affiche la liste de tous les utilisateurs
+ * Affiche : nom, email, rôle, nombre de playlists, parties, date d'inscription
+ *
+ * @async
+ */
 async function loadUsers() {
     try {
         const response = await apiCall('/admin/users');
@@ -233,6 +281,13 @@ async function loadUsers() {
 
 // ========== LOAD SONGS ==========
 
+/**
+ * Charge et affiche la liste de toutes les chansons
+ * Affiche : titre, artiste, album, usage dans playlists, date d'ajout
+ * Permet la suppression des chansons
+ *
+ * @async
+ */
 async function loadSongs() {
     try {
         const response = await apiCall('/admin/songs');
@@ -300,6 +355,14 @@ async function loadSongs() {
 
 // ========== DELETE SONG ==========
 
+/**
+ * Supprime une chanson de la base de données
+ * La chanson est automatiquement retirée de toutes les playlists
+ * Demande confirmation avant suppression
+ *
+ * @async
+ * @param {string} songId - L'ID de la chanson à supprimer
+ */
 async function deleteSong(songId) {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette chanson ? Elle sera retirée de toutes les playlists.')) {
         return;
@@ -321,6 +384,12 @@ async function deleteSong(songId) {
 
 // ========== LOAD SERVER INFO ==========
 
+/**
+ * Charge et affiche les informations du serveur
+ * Affiche : réseau, port, système (OS, hostname, CPUs, RAM, uptime, Node.js), base de données
+ *
+ * @async
+ */
 async function loadServerInfo() {
     try {
         const response = await apiCall('/admin/server-info');
@@ -414,6 +483,12 @@ async function loadServerInfo() {
 
 // ========== LOAD DATABASE INFO ==========
 
+/**
+ * Charge et affiche l'état de santé de la base de données
+ * Affiche : état de santé, collections avec nombre de documents et tailles
+ *
+ * @async
+ */
 async function loadDatabaseInfo() {
     try {
         const response = await apiCall('/admin/db-health');
@@ -473,6 +548,10 @@ async function loadDatabaseInfo() {
 
 // ========== TAB NAVIGATION ==========
 
+/**
+ * Configure la navigation par onglets
+ * Charge automatiquement les données correspondantes lors du changement d'onglet
+ */
 function setupTabs() {
     const tabs = document.querySelectorAll('.tab');
     const contents = document.querySelectorAll('.tab-content');
@@ -489,7 +568,7 @@ function setupTabs() {
             contents.forEach(c => c.classList.remove('active'));
             document.getElementById(targetTab).classList.add('active');
 
-            // Load data for the tab
+            // Charger les données correspondant à l'onglet
             switch (targetTab) {
                 case 'users':
                     loadUsers();
@@ -510,18 +589,25 @@ function setupTabs() {
 
 // ========== INIT ==========
 
+/**
+ * Initialisation de la page d'administration
+ * - Vérifie les permissions admin
+ * - Configure la navigation par onglets
+ * - Charge les données initiales (stats et utilisateurs)
+ * - Initialise les icônes Lucide
+ */
 document.addEventListener('DOMContentLoaded', async () => {
     // Vérifier que l'utilisateur est admin
     const isAdmin = await verifyAdmin();
     if (!isAdmin) return;
 
-    // Setup tabs
+    // Configuration de la navigation par onglets
     setupTabs();
 
-    // Load initial data
+    // Chargement des données initiales
     await loadStats();
     await loadUsers();
 
-    // Initialize Lucide icons
+    // Initialisation des icônes Lucide
     lucide.createIcons();
 });
