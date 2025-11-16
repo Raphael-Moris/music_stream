@@ -33,12 +33,13 @@ Grâce à Docker, l’application se lance à l’identique sous Windows, macOS 
 Projet/
 ├─ backend/            # Routes Express, modèles Mongoose, scripts
 ├─ frontend/           # Pages statiques et assets
+├─ docs/               # Documentation complète du projet
 ├─ config/, data/, temp/
 ├─ Streaming_platform/ # Dump BSON importé dans Mongo
 ├─ docker-compose.yml
 ├─ Dockerfile
 ├─ init-mongo.sh       # Script de restauration automatique
-├─ README-DOCKER.md    # Guide détaillé / dépannage
+├─ start_projet.sh     # Script de démarrage automatique
 └─ README.md           # Guide rapide (ce fichier)
 ```
 
@@ -147,8 +148,8 @@ Le script va :
 - Tout le monde suit le même workflow Docker, sans adaptation spécifique.
 - Avant de livrer à un camarade ou au professeur :
   1. Vérifier que `docker compose up --build` passe sur votre machine.
-  2. Tester l’upload Cloudinary et le BlindTest.
-  3. Mettre à jour `README-DOCKER.md` si un changement de procédure est nécessaire.
+  2. Tester l'upload Cloudinary et le BlindTest.
+  3. Mettre à jour `docs/README-DOCKER.md` si un changement de procédure est nécessaire.
 - Livraison : dépôt GitHub ou archive `.zip` / `.tar.gz` incluant `Streaming_platform/`.
 
 ---
@@ -169,16 +170,16 @@ Docker reste toutefois l’environnement de référence pour les démonstrations
 
 ### Documentation principale
 
-Ce projet dispose d'une documentation complète et détaillée pour faciliter l'installation, l'utilisation et le rendu :
+Ce projet dispose d'une documentation complète et détaillée. Toute la documentation se trouve dans le dossier **`docs/`**.
 
 | Document | Description | Lien |
 |----------|-------------|------|
-| **Guide de démarrage rapide** | Ce fichier (installation Docker en 3 étapes) | [README.md](./README.md) |
-| **Documentation technique** | Installation complète, configuration, utilisation, tests, troubleshooting | [docs/documentation_technique.md](./docs/documentation_technique.md) |
+| **Guide de démarrage rapide** | Ce fichier (installation Docker avec script automatique) | [README.md](./README.md) |
+| **Guide du script de démarrage** | Utilisation du script start_projet.sh | [docs/START_README.md](./docs/START_README.md) |
 | **Guide Docker** | Commandes Docker avancées, volumes, réseaux, optimisation | [docs/README-DOCKER.md](./docs/README-DOCKER.md) |
+| **Documentation technique** | Installation complète, configuration, utilisation, tests, troubleshooting | [docs/documentation_technique.md](./docs/documentation_technique.md) |
 | **Référence API** | Tous les endpoints REST et WebSocket avec exemples curl | [docs/api_reference.md](./docs/api_reference.md) |
 | **Contenu du projet** | Liste complète des fichiers et ordre de lancement | [docs/project_contents.txt](./docs/project_contents.txt) |
-| **Guide de rendu** | Instructions pour préparer l'archive ZIP finale | [docs/guide_rendu.md](./docs/guide_rendu.md) |
 
 ### Configuration
 
@@ -246,38 +247,6 @@ La base de données pré-remplie contient plusieurs comptes de test :
 - `/api/admin` - Administration (stats, gestion)
 
 **Documentation complète** : [docs/api_reference.md](./docs/api_reference.md)
-
----
-
-## 📦 Préparation du rendu
-
-Pour préparer l'archive ZIP du projet pour le rendu, consultez le guide complet :
-
-**[docs/guide_rendu.md](./docs/guide_rendu.md)**
-
-Ce guide contient :
-- Checklist complète avant soumission
-- Instructions pour créer l'archive ZIP
-- Procédure de test de l'archive
-- Liste des fichiers à inclure/exclure
-- Troubleshooting des problèmes courants
-
-**Résumé rapide** :
-
-```bash
-# 1. Nettoyer le projet
-rm -rf node_modules
-
-# 2. Vérifier la documentation
-ls -la docs/
-
-# 3. Créer l'archive
-zip -r SAE_302_Streaming_Musical.zip . \
-  -x "node_modules/*" -x ".git/*" -x ".env" -x "*.log"
-
-# 4. Vérifier la taille (doit être < 200 Mo)
-du -h SAE_302_Streaming_Musical.zip
-```
 
 ---
 
