@@ -53,39 +53,68 @@ Projet/
 
 ---
 
-## 🚀 Mise en route (cloner + Docker)
+## 🚀 Démarrage rapide
+
+### Méthode 1 : Script automatique (RECOMMANDÉ)
+
+Le script `start_projet.sh` automatise tout le processus de démarrage et vérifie que l'application fonctionne correctement.
 
 1. **Cloner le dépôt**
    ```bash
-   git clone git@github.com:Raphael-Moris/music_stream.git
+   git clone https://github.com/Raphael-Moris/music_stream.git
    cd music_stream
-   # ou en HTTPS :
-   # git clone https://github.com/Raphael-Moris/music_stream.git
    ```
 
-2. **Copier le fichier d’environnement Docker**
+2. **Lancer le script de démarrage**
+   ```bash
+   # Linux / macOS / Git Bash (Windows)
+   ./start_projet.sh
+
+   # Windows PowerShell
+   bash start_projet.sh
+   ```
+
+Le script va :
+- ✅ Vérifier que Docker est installé
+- ✅ Nettoyer les anciens conteneurs
+- ✅ Configurer l'environnement (.env)
+- ✅ Démarrer les conteneurs Docker
+- ✅ Importer automatiquement 43 documents dans MongoDB
+- ✅ Tester que tout fonctionne
+
+**Temps d'exécution** : 2-5 minutes (première fois)
+
+### Méthode 2 : Démarrage manuel avec Docker
+
+1. **Cloner le dépôt**
+   ```bash
+   git clone https://github.com/Raphael-Moris/music_stream.git
+   cd music_stream
+   ```
+
+2. **Copier le fichier d'environnement**
    ```bash
    # Windows PowerShell
    copy .env.docker .env
    # Linux / macOS
    cp .env.docker .env
    ```
-   `.env.docker` contient déjà les clés Cloudinary partagées et l’URI Mongo interne.  
-   Aucun compte externe n’est requis pour tester l’application.
+   `.env.docker` contient déjà les clés Cloudinary partagées et l'URI Mongo interne.
+   Aucun compte externe n'est requis pour tester l'application.
 
-3. **Lancer la stack**
+3. **Lancer Docker Compose**
    ```bash
    docker compose up --build
    ```
-   - Télécharge les images Node/Mongo et construit l’application.
-   - Restaure automatiquement la base grâce à `Streaming_platform/`.
-   - Expose l’UI / API sur `http://localhost:3500`.
+   - Télécharge les images Node/Mongo et construit l'application
+   - Restaure automatiquement la base grâce à `Streaming_platform/` (43 documents)
+   - Expose l'UI / API sur `http://localhost:3500`
 
-4. **Tester l’application**
+4. **Tester l'application**
    - Interface utilisateur : `http://localhost:3500`
+   - Page de connexion : `http://localhost:3500/login.html`
    - Page admin : `http://localhost:3500/admin.html`
    - BlindTest : `http://localhost:3500/blindtest.html`
-   - Identifiants de test : voir `README-DOCKER.md` ou la collection `users`.
 
 5. **Contrôles / diagnostics (optionnel)**
    ```bash
@@ -180,12 +209,19 @@ Une page de diagnostic système est disponible pour vérifier l'état de l'appli
 
 ### Identifiants de test
 
+La base de données pré-remplie contient plusieurs comptes de test :
+
 **Compte administrateur** :
 - Identifiant : `admin`
 - Mot de passe : `admin`
 - Privilèges : Accès complet (gestion users, songs, playlists, statistiques)
 
-**Autres comptes** : Créer un compte via la page de connexion ou utiliser les utilisateurs importés depuis la base de données.
+**Compte utilisateur avec données de test** :
+- Identifiant : `Raphael`
+- Mot de passe : `123456`
+- Données : Playlists, historique de blind test, statistiques
+
+**Autres comptes** : Vous pouvez créer un nouveau compte via la page de connexion ou utiliser les autres utilisateurs importés depuis la base de données.
 
 ### Points d'accès
 

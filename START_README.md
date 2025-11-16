@@ -1,8 +1,8 @@
-# Script de Test Universel - SAE 302
+# Script de Démarrage Universel - SAE 302
 
 ## Description
 
-Le script `test_projet.sh` permet de tester automatiquement le projet sur **n'importe quel système d'exploitation** :
+Le script `start_projet.sh` permet de démarrer automatiquement le projet sur **n'importe quel système d'exploitation** :
 - ✅ **Windows** (Git Bash, WSL, PowerShell)
 - ✅ **Linux** (Ubuntu, Debian, Fedora, etc.)
 - ✅ **macOS**
@@ -35,19 +35,19 @@ git clone https://github.com/Raphael-Moris/music_stream.git
 cd music_stream
 ```
 
-### 2. Lancer le script de test
+### 2. Lancer le script de démarrage
 
 **Sur Linux / macOS / Git Bash (Windows) :**
 ```bash
-./test_projet.sh
+./start_projet.sh
 ```
 
 **Sur Windows PowerShell :**
 ```powershell
-bash test_projet.sh
+bash start_projet.sh
 ```
 
-### 3. Attendre la fin du test
+### 3. Attendre la fin du démarrage
 
 Le script va :
 1. Vérifier l'environnement
@@ -127,8 +127,8 @@ docker compose down -v
 
 **Permissions :**
 ```bash
-chmod +x test_projet.sh
-./test_projet.sh
+chmod +x start_projet.sh
+./start_projet.sh
 ```
 
 ### Docker n'est pas installé
