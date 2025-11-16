@@ -179,7 +179,6 @@ Ce projet dispose d'une documentation complète et détaillée. Toute la documen
 | **Guide Docker** | Commandes Docker avancées, volumes, réseaux, optimisation | [docs/README-DOCKER.md](./docs/README-DOCKER.md) |
 | **Documentation technique** | Installation complète, configuration, utilisation, tests, troubleshooting | [docs/documentation_technique.md](./docs/documentation_technique.md) |
 | **Référence API** | Tous les endpoints REST et WebSocket avec exemples curl | [docs/api_reference.md](./docs/api_reference.md) |
-| **Contenu du projet** | Liste complète des fichiers et ordre de lancement | [docs/project_contents.txt](./docs/project_contents.txt) |
 
 ### Configuration
 
